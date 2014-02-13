@@ -1,10 +1,11 @@
 package org.antinori.lumber;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
@@ -19,12 +20,14 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Vector3;
 
 public class FramingStudDesigner extends SimpleGame {
 	
 	public Environment environment;
 	
-	public List<Room> boxes = new ArrayList<Room>();
+	public Map<String, Room> boxes = new HashMap<String, Room>();
+	RoomSelectionPanel dialog;
 		
 	public static void main(String[] args) {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
@@ -44,20 +47,17 @@ public class FramingStudDesigner extends SimpleGame {
 
 		modelBatch = new ModelBatch();
 
-		
-		ModelBuilder builder = new ModelBuilder();
-		
 		float width = 23*12;
 		float length = 18*12;
 		float height = 10*12;
 		
-		Room box = new Room(builder, Color.BLUE, 0,0,0, width, height, length);
-		boxes.add(box);
-		
-		Room box2 = new Room(builder, Color.BLUE, 0,0,20*12, 12*12, 10*12, 8*12);
-		boxes.add(box2);
-							
+		addRoom(0,0,0, width, height, length);
+		addRoom(0,0,20*12, 12*12, 10*12, 8*12);
+					
 		createAxes();
+		
+		dialog = new RoomSelectionPanel(hud, this, skin);
+		hud.addActor(dialog);
 		
 	}
 
@@ -68,20 +68,73 @@ public class FramingStudDesigner extends SimpleGame {
 		
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+		
+		hud.act(Gdx.graphics.getDeltaTime());
 
 		modelBatch.begin(cam);
 				
-		for (Room box : boxes) {
+		for (Room box : boxes.values()) {
 			box.draw(modelBatch, environment);
 		}
-
 		
         modelBatch.render(axesInstance);
 
 		modelBatch.end();
+				
+	}
+	
+	public String addRoom(float x, float y, float z, float width, float height, float length) {
+		int i = 1;
+		String name = "Room " + i;
+		do {
+			if (!boxes.containsKey(name)) {
+				break;
+			}
+			name = "Room " + (i++);
+		} while (true);
 		
+		ModelBuilder builder = new ModelBuilder();
 
+		Room room = new Room(builder, Color.BLUE, x,y,z, width, height, length);
+		boxes.put(name, room);
 		
+		return name;
+	}
+	
+	@Override
+	public boolean keyDown (int keycode) {
+		if (keycode == Keys.X) {
+			
+			Room room = boxes.get(dialog.dropdown.getSelection());
+			room.move(Room.Move.MOVEYMINUS);
+			
+		} else if (keycode == Keys.S) {
+			
+			Room room = boxes.get(dialog.dropdown.getSelection());
+			room.move(Room.Move.MOVEYPLUS);
+			
+		} else if (keycode == Keys.C) {
+			
+			Room room = boxes.get(dialog.dropdown.getSelection());
+			room.move(Room.Move.MOVEZMINUS);
+			
+		} else if (keycode == Keys.D) {
+			
+			Room room = boxes.get(dialog.dropdown.getSelection());
+			room.move(Room.Move.MOVEZPLUS);
+			
+		} else if (keycode == Keys.Z) {
+			
+			Room room = boxes.get(dialog.dropdown.getSelection());
+			room.move(Room.Move.MOVEXMINUS);
+			
+		} else if (keycode == Keys.A) {
+			
+			Room room = boxes.get(dialog.dropdown.getSelection());
+			room.move(Room.Move.MOVEXPLUS);
+			
+		}
+		return false;
 	}
 
 	

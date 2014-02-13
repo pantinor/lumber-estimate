@@ -20,6 +20,11 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 
 public class Room {
 	
+	public static boolean roomIsVisible = true;
+	public static boolean wallIsVisible = true;
+	public static boolean studIsVisible = true;
+	public static boolean studDebugIsVisible = false;
+	
 	private Model model;
 	private ModelInstance instance;
 	
@@ -27,6 +32,8 @@ public class Room {
 	private Color color; 
 	
 	private List<Wall> walls = new ArrayList<Wall>();
+	
+	public enum Move {MOVEXPLUS,MOVEYPLUS,MOVEZPLUS,MOVEXMINUS,MOVEYMINUS,MOVEZMINUS};
 
 	public Room(ModelBuilder modelBuilder, Color color, float x, float y, float z, float width, float height, float length) {
 		
@@ -108,24 +115,40 @@ public class Room {
 	
 	public void draw(ModelBatch modelBatch, Environment environment) {
 	
-		//modelBatch.render(instance, environment);
+		if (roomIsVisible) {
+			modelBatch.render(instance, environment);
+		}
 		
 		for (Wall wall : walls) {
 			
-			//modelBatch.render(wall.getInstance(), environment);
+			if (wallIsVisible) {
+				modelBatch.render(wall.getInstance(), environment);
+			}
 
 			for (Lumber l : wall.getTopPieces()) {
-				modelBatch.render(l.getInstance(), environment);
-				modelBatch.render(l.getDebugInstance(), environment);
+				if (studIsVisible) {
+					modelBatch.render(l.getInstance(), environment);
+				}
+				if (studDebugIsVisible) {
+					modelBatch.render(l.getDebugInstance(), environment);
+				}
 			}
 			
 			for (Lumber l : wall.getBottomPieces()) {
-				modelBatch.render(l.getInstance(), environment);
-				modelBatch.render(l.getDebugInstance(), environment);
+				if (studIsVisible) {
+					modelBatch.render(l.getInstance(), environment);
+				}
+				if (studDebugIsVisible) {
+					modelBatch.render(l.getDebugInstance(), environment);
+				}
 			}
 			for (Lumber l : wall.getVerticalPieces()) {
-				modelBatch.render(l.getInstance(), environment);
-				modelBatch.render(l.getDebugInstance(), environment);
+				if (studIsVisible) {
+					modelBatch.render(l.getInstance(), environment);
+				}
+				if (studDebugIsVisible) {
+					modelBatch.render(l.getDebugInstance(), environment);
+				}
 			}
 		}
 		
@@ -151,8 +174,8 @@ public class Room {
 			
 			Model model = modelBuilder.createBox(dims.x, dims.y, dims.z, new Material(ColorAttribute.createDiffuse(Color.PINK)), Usage.Position | Usage.Normal);
 
-			instance = new ModelInstance(model, center);
-			l.setInstance(instance);
+			ModelInstance linst = new ModelInstance(model, center);
+			l.setInstance(linst);
 			l.setDebugInstance(createDebugBoxOutline(l.getBbox()));
 		}
 		
@@ -170,8 +193,8 @@ public class Room {
 			
 			Model model = modelBuilder.createBox(dims.x, dims.y, dims.z, new Material(ColorAttribute.createDiffuse(Color.PINK)), Usage.Position | Usage.Normal);
 
-			instance = new ModelInstance(model, center);
-			l.setInstance(instance);
+			ModelInstance linst = new ModelInstance(model, center);
+			l.setInstance(linst);
 			l.setDebugInstance(createDebugBoxOutline(l.getBbox()));
 		}
 		
@@ -196,8 +219,8 @@ public class Room {
 			
 			Model model = modelBuilder.createBox(dims.x, dims.y, dims.z, new Material(ColorAttribute.createDiffuse(Color.PINK)), Usage.Position | Usage.Normal);
 
-			instance = new ModelInstance(model, center);
-			l.setInstance(instance);
+			ModelInstance linst = new ModelInstance(model, center);
+			l.setInstance(linst);
 			l.setDebugInstance(createDebugBoxOutline(l.getBbox()));
 			
 			tempLen += 16;
@@ -320,6 +343,60 @@ public class Room {
 	}
 	
 	
+	
+	public void move(Move move) {
+		
+		moveInstance(this.instance, move);
+		
+		for (Wall wall : walls) {
+			
+			moveInstance(wall.getInstance(), move);
+
+			for (Lumber l : wall.getTopPieces()) {
+				moveInstance(l.getInstance(), move);
+				moveInstance(l.getDebugInstance(), move);
+			}
+			for (Lumber l : wall.getBottomPieces()) {
+				moveInstance(l.getInstance(), move);
+				moveInstance(l.getDebugInstance(), move);
+			}			
+			for (Lumber l : wall.getVerticalPieces()) {
+				moveInstance(l.getInstance(), move);
+				moveInstance(l.getDebugInstance(), move);
+			}
+
+		}
+		
+
+	}
+	
+	private void moveInstance(ModelInstance inst, Move move) {
+		Vector3 tmp = new Vector3();
+		inst.transform.getTranslation(tmp);
+		switch (move) {
+		case MOVEXMINUS:
+			inst.transform.setToTranslation(tmp.x-12,tmp.y,tmp.z);
+			break;
+		case MOVEXPLUS:
+			inst.transform.setToTranslation(tmp.x+12,tmp.y,tmp.z);
+			break;
+		case MOVEYMINUS:
+			inst.transform.setToTranslation(tmp.x,tmp.y-12,tmp.z);
+			break;
+		case MOVEYPLUS:
+			inst.transform.setToTranslation(tmp.x,tmp.y+12,tmp.z);
+			break;
+		case MOVEZMINUS:
+			inst.transform.setToTranslation(tmp.x,tmp.y,tmp.z-12);
+			break;
+		case MOVEZPLUS:
+			inst.transform.setToTranslation(tmp.x,tmp.y,tmp.z+12);
+			break;
+		default:
+			break;
+		
+		}
+	}
 
 
 }

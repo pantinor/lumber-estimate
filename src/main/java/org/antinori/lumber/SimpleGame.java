@@ -42,10 +42,10 @@ public abstract class SimpleGame implements ApplicationListener, InputProcessor 
 		inputController = new CameraInputController(cam);
 		inputController.rotateLeftKey = inputController.rotateRightKey = inputController.forwardKey = inputController.backwardKey = 0;
 
-		hud = new Stage(PREF_HUDWIDTH, PREF_HUDHEIGHT, true);
+		hud = new Stage();
 		hudWidth = hud.getWidth();
 		hudHeight = hud.getHeight();
-		skin = new Skin(Gdx.files.classpath("uiskin.json"));
+		skin = new Skin(Gdx.files.classpath("skin/uiskin.json"));
 		
 		init();		
 		
