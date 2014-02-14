@@ -1,10 +1,14 @@
 package org.antinori.lumber;
 
 
+import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
@@ -20,7 +24,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.math.Vector3;
 
 public class FramingStudDesigner extends SimpleGame {
 	
@@ -28,6 +31,8 @@ public class FramingStudDesigner extends SimpleGame {
 	
 	public Map<String, Room> boxes = new HashMap<String, Room>();
 	RoomSelectionPanel dialog;
+	boolean fullscreen = false;
+
 		
 	public static void main(String[] args) {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
@@ -133,6 +138,18 @@ public class FramingStudDesigner extends SimpleGame {
 			Room room = boxes.get(dialog.dropdown.getSelection());
 			room.move(Room.Move.MOVEXPLUS);
 			
+		} else if (keycode == Keys.ESCAPE) {
+			
+			if(fullscreen) {
+				Gdx.graphics.setDisplayMode(1280, 768, false);
+				hud.setViewport(1280, 768, false);
+				fullscreen = false;
+			} else {
+				DisplayMode desktopDisplayMode = Gdx.graphics.getDesktopDisplayMode();
+				Gdx.graphics.setDisplayMode(desktopDisplayMode.width, desktopDisplayMode.height, true);
+				hud.setViewport(desktopDisplayMode.width, desktopDisplayMode.height, false);
+				fullscreen = true;
+			}
 		}
 		return false;
 	}
@@ -164,6 +181,58 @@ public class FramingStudDesigner extends SimpleGame {
 		builder.line(0, 0, 0, 0, 0, 500);
 		axesModel = modelBuilder.end();
 		axesInstance = new ModelInstance(axesModel);
+	}
+	
+	public List<String> getMaterialsList() {
+		
+		List<String> list = new ArrayList<String>();
+		
+		Map<LumberType, Integer> counts = new HashMap<LumberType, Integer>();
+		for (LumberType type : LumberType.values()) {
+			counts.put(type, 0);
+		}
+
+		for (String name : boxes.keySet()) {
+			Room room = boxes.get(name);
+			for (Wall wall : room.getWalls()) {
+				for (Lumber l : wall.getTopPieces()) {
+					LumberType type = l.getType();
+					int c = counts.get(type);
+					c ++;
+					counts.put(type, c);
+				}
+				for (Lumber l : wall.getBottomPieces()) {
+					LumberType type = l.getType();
+					int c = counts.get(type);
+					c ++;
+					counts.put(type, c);
+				}
+				for (Lumber l : wall.getVerticalPieces()) {
+					LumberType type = l.getType();
+					int c = counts.get(type);
+					c ++;
+					counts.put(type, c);
+				}
+			}
+		}
+		
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		
+		float total = 0;
+		for (LumberType type : LumberType.values()) {
+			int count = counts.get(type);
+			if (count < 1) continue;
+			float cost = count * type.getCost();
+			String moneyString = formatter.format(cost);
+			list.add(type.getName() + "  Count: " + count + "  Cost: " + moneyString);
+			total += cost;
+		}
+
+		String moneyString = formatter.format(total);
+		
+		list.add("Total Cost: " + moneyString);
+		
+		return list;
 	}
 
 

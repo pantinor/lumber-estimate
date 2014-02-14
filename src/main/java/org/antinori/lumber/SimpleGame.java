@@ -33,15 +33,16 @@ public abstract class SimpleGame implements ApplicationListener, InputProcessor 
 	public void create() {
 		
 		cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		cam.position.set(200, 50, 0);
-		cam.lookAt(0, 0, 0);
+		cam.position.set(-100, 150, -100);
+		cam.lookAt(150,0,150);
 		cam.near = 0.1f;
 		cam.far = 1000f;
 		cam.update();
 		
 		inputController = new CameraInputController(cam);
 		inputController.rotateLeftKey = inputController.rotateRightKey = inputController.forwardKey = inputController.backwardKey = 0;
-
+		inputController.translateUnits = 30f;
+		
 		hud = new Stage();
 		hudWidth = hud.getWidth();
 		hudHeight = hud.getHeight();

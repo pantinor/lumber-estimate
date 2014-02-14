@@ -1,6 +1,7 @@
 package org.antinori.lumber;
 
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -30,6 +31,8 @@ public class RoomSelectionPanel extends Window {
 	final private TextField tfl ;
 	
 	final public SelectBox dropdown;
+	
+	private MaterialsWindow materials;
 			
 	public RoomSelectionPanel(final Stage stage, FramingStudDesigner main, Skin skin) {
 				
@@ -45,6 +48,9 @@ public class RoomSelectionPanel extends Window {
 		final CheckBox showWalls = new CheckBox(" Show Walls", skin);
 		final CheckBox showStuds = new CheckBox(" Show Studs", skin);
 		final CheckBox showDebugStuds = new CheckBox(" Show Stud Outlines", skin);
+		
+		final CheckBox showMaterials = new CheckBox(" Show Materials", skin);
+
 		
 		showRooms.setChecked(Room.roomIsVisible);
 		showWalls.setChecked(Room.wallIsVisible);
@@ -92,6 +98,16 @@ public class RoomSelectionPanel extends Window {
 			}
 		});
 		
+		showMaterials.addListener(new ChangeListener() {
+			public void changed (ChangeEvent event, Actor actor) {
+				if (showMaterials.isChecked()) {
+					materials = new MaterialsWindow(RoomSelectionPanel.this.main.hud, RoomSelectionPanel.this.main, RoomSelectionPanel.this.main.skin);
+				} else {
+					materials.remove();
+				}
+			}
+		});
+		
 		tfx = createTextField("", skin);
 		tfy = createTextField("", skin);
 		tfz = createTextField("", skin);
@@ -113,6 +129,26 @@ public class RoomSelectionPanel extends Window {
 		String[] names = main.boxes.keySet().toArray(new String[0]);
 		
 		dropdown = new SelectBox(names, skin);
+		
+		
+		dropdown.addListener(new ChangeListener() {
+			public void changed (ChangeEvent event, Actor actor) {
+				String selected = dropdown.getSelection();
+
+				Room room = RoomSelectionPanel.this.main.boxes.get(selected);
+				Vector3 tmp = new Vector3();
+				room.getInstance().transform.getTranslation(tmp);
+
+				RoomSelectionPanel.this.main.cam.position.set(tmp.x-250,tmp.y+150,tmp.z-250);
+				RoomSelectionPanel.this.main.cam.lookAt(tmp);
+
+				RoomSelectionPanel.this.main.cam.update();
+			}
+		});
+		
+		
+		
+		
 
 		add(showRooms).colspan(2);
 		add(showWalls).colspan(2);
@@ -120,6 +156,9 @@ public class RoomSelectionPanel extends Window {
 		
 		add(showDebugStuds).colspan(2);
 		add(showStuds).colspan(2);
+		row();
+		
+		add(showMaterials).colspan(4);
 		row();
 		
 		add(new Label("Position:",skin)).space(3);

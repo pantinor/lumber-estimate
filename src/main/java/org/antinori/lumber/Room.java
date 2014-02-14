@@ -344,6 +344,18 @@ public class Room {
 	
 	
 	
+	public List<Wall> getWalls() {
+		return walls;
+	}
+
+
+
+	public void setWalls(List<Wall> walls) {
+		this.walls = walls;
+	}
+
+
+
 	public void move(Move move) {
 		
 		moveInstance(this.instance, move);
@@ -397,6 +409,9 @@ public class Room {
 		
 		}
 	}
+
+	
+	
 
 
 }
