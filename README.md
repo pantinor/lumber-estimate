@@ -5,6 +5,7 @@ Graphical 3D tool built on LIBGDX API that can visualize and estimate inventory 
 
 ![screenshot of animated pieces](https://raw.github.com/pantinor/lumber-estimate/master/preview.png)
 
-To run this tool, download the pre-built archive (lumber-estimate-1.0.1-bin.zip) above, extract it, and double click on the jar file.
-Important Pre-requisite:  Java must be installed in order to run this tool on your computer.  
-Java can be installed frmo this website: http://java.sun.com
+After cloning this project, you will need to run command "mvn clean install" to build the binary zip archive.
+Extract the archive and double click on the jar file to run it.
+Java must be installed as a pre-requisite.  Maven is also a pre-requisite.
+Of course, you may also import this as a maven project in eclipse IDE and run the main class.
