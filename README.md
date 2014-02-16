@@ -7,7 +7,7 @@ Note that this tool is designed to run on desktop display mode.
 
 ![screenshot of animated pieces](https://raw.github.com/pantinor/lumber-estimate/master/preview.png)
 
-After cloning this project, you will need to run command "mvn clean install" to build the binary zip archive.
-Extract the archive and double click on the jar file to run it.
-Java must be installed as a pre-requisite.  Maven is also a pre-requisite.
-Of course, you may also import this as a maven project in eclipse IDE and run the main class.
+Download pre-built zip: https://dl.dropboxusercontent.com/u/84215797/lumber-estimate-1.0.1-bin.zip
+
+Download the archive, extract it and double click on the jar file to run the program.
+Java must be installed as a pre-requisite.
