@@ -1,7 +1,10 @@
 package org.antinori.lumber;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -11,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
@@ -161,20 +165,31 @@ public class RoomSelectionPanel extends Window {
 		add(showMaterials).colspan(4);
 		row();
 		
-		add(new Label("Position:",skin)).space(3);
-		add(tfx).maxWidth(tfWidth).width(tfWidth);
-		add(tfy).maxWidth(tfWidth).width(tfWidth);
-		add(tfz).maxWidth(tfWidth).width(tfWidth);
+		//add().space(3).colspan(4);
+		//row();
+		
+		Table addRoomTable = new Table();
+		addRoomTable.defaults().padTop(2).padBottom(2).padLeft(2).padRight(2).left();
+		
+		addRoomTable.add(new Label("Pos (X,Y,Z) inches:",skin)).space(3);
+		addRoomTable.add(tfx).maxWidth(tfWidth).width(tfWidth);
+		addRoomTable.add(tfy).maxWidth(tfWidth).width(tfWidth);
+		addRoomTable.add(tfz).maxWidth(tfWidth).width(tfWidth);
+		addRoomTable.row();
+		
+		addRoomTable.add(new Label("Dim (W,H,L) feet:",skin)).space(3);
+		addRoomTable.add(tfw).maxWidth(tfWidth).width(tfWidth);
+		addRoomTable.add(tfh).maxWidth(tfWidth).width(tfWidth);
+		addRoomTable.add(tfl).maxWidth(tfWidth).width(tfWidth);
+		addRoomTable.row();
+		
+		addRoomTable.add(addRoom).maxWidth(75).width(75).colspan(4);
+		
+		add(addRoomTable).colspan(4);
 		row();
 		
-		add(new Label("Dimensions:",skin)).space(3);
-		add(tfw).maxWidth(tfWidth).width(tfWidth);
-		add(tfh).maxWidth(tfWidth).width(tfWidth);
-		add(tfl).maxWidth(tfWidth).width(tfWidth);
-		row();
-		
-		add(addRoom).colspan(4);
-		row();
+		//add().space(3).colspan(4);
+		//row();
 		
 		add(new Label("Select Room:",skin)).fillX().colspan(4);
 		row();
@@ -192,6 +207,17 @@ public class RoomSelectionPanel extends Window {
 		add(mxm).maxWidth(btnWidth).width(btnWidth);
 		add(mym).maxWidth(btnWidth).width(btnWidth);
 		add(mzm).maxWidth(btnWidth).width(btnWidth);
+		row();
+		
+		
+		
+		Button load = createButton("Load", skin, createLoadListener());
+		Button save = createButton("Save", skin, createSaveListener());
+		Table bottom = new Table();
+		bottom.defaults().padTop(2).padBottom(2).padLeft(5).padRight(5).left();
+		bottom.add(load).maxWidth(75).width(75);
+		bottom.add(save).maxWidth(75).width(75);
+		add(bottom).colspan(4);
 		row();
 		
 				
@@ -271,6 +297,67 @@ public class RoomSelectionPanel extends Window {
 			}
 		};
 		
+		return listener;
+	}
+	
+	private InputListener createSaveListener() {
+		InputListener listener = new InputListener() {
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+				try {
+					FileHandle file = Gdx.files.local("lumber-project.save");
+					StringBuffer sb = new StringBuffer();
+					for (String name : main.boxes.keySet()) {
+						Room room = main.boxes.get(name);
+						BoundingBox box = room.getInstance().calculateBoundingBox(new BoundingBox());
+						Vector3 dims = box.getDimensions();
+						sb.append(name + "," + 
+									(room.getCenter().x - dims.x/2) + "," + 
+									(room.getCenter().y - dims.y/2) + "," + 
+									(room.getCenter().z - dims.z/2) + "," + 
+									dims.x + "," + 
+									dims.y + "," + 
+									dims.z + "\n");
+					}
+					file.writeString(sb.toString(), false);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+		};
+
+		return listener;
+	}
+
+	private InputListener createLoadListener() {
+		InputListener listener = new InputListener() {
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+
+				try {
+					FileHandle file = Gdx.files.local("lumber-project.save");
+					String text = file.readString();
+					String[] rooms = text.split("\\r?\\n");
+					for (String room : rooms) {
+						String[] params = room.split("[,]");
+						float tx = Float.parseFloat(params[1]);
+						float ty = Float.parseFloat(params[2]);
+						float tz = Float.parseFloat(params[3]);
+						float tw = Float.parseFloat(params[4]);
+						float th = Float.parseFloat(params[5]);
+						float tl = Float.parseFloat(params[6]);
+						main.addRoom(tx, ty, tz, tw, th, tl);
+					}
+					
+					String[] names = main.boxes.keySet().toArray(new String[0]);
+					dropdown.setItems(names);
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return false;
+			}
+		};
+
 		return listener;
 	}
 

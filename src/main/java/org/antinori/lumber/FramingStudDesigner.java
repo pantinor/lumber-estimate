@@ -1,7 +1,6 @@
 package org.antinori.lumber;
 
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +23,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Vector3;
 
 public class FramingStudDesigner extends SimpleGame {
 	
@@ -138,6 +138,42 @@ public class FramingStudDesigner extends SimpleGame {
 			Room room = boxes.get(dialog.dropdown.getSelection());
 			room.move(Room.Move.MOVEXPLUS);
 			
+		} else if (keycode == Keys.NUMPAD_0) {
+			
+			cam.position.set(-100, 150, -100);
+			cam.lookAt(150,0,150);
+			cam.update();
+			
+		} else if (keycode == Keys.NUMPAD_4) {
+			
+			cam.position.set(cam.position.x+5*12,cam.position.y,cam.position.z);
+			lookAtSelectedRoom();
+			
+		} else if (keycode == Keys.NUMPAD_1) {
+			
+			cam.position.set(cam.position.x-5*12,cam.position.y,cam.position.z);
+			lookAtSelectedRoom();
+			
+		} else if (keycode == Keys.NUMPAD_5) {
+			
+			cam.position.set(cam.position.x,cam.position.y+5*12,cam.position.z);
+			lookAtSelectedRoom();
+
+		} else if (keycode == Keys.NUMPAD_2) {
+			
+			cam.position.set(cam.position.x,cam.position.y-5*12,cam.position.z);
+			lookAtSelectedRoom();
+
+		} else if (keycode == Keys.NUMPAD_6) {
+			
+			cam.position.set(cam.position.x,cam.position.y,cam.position.z+5*12);
+			lookAtSelectedRoom();
+			
+		} else if (keycode == Keys.NUMPAD_3) {
+			
+			cam.position.set(cam.position.x,cam.position.y,cam.position.z-5*12);
+			lookAtSelectedRoom();
+			
 		} else if (keycode == Keys.ESCAPE) {
 			
 			if(fullscreen) {
@@ -153,6 +189,18 @@ public class FramingStudDesigner extends SimpleGame {
 		}
 		return false;
 	}
+	
+	private void lookAtSelectedRoom() {
+		Room room = boxes.get(dialog.dropdown.getSelection());
+		Vector3 tmp = new Vector3();
+		room.getInstance().transform.getTranslation(tmp);
+		//cam.normalizeUp();
+		//cam.lookAt(tmp);
+		//cam.up.nor();
+		 
+		cam.update();
+	}
+
 
 	
 	final float GRID_MIN = -12*1000;
@@ -183,9 +231,9 @@ public class FramingStudDesigner extends SimpleGame {
 		axesInstance = new ModelInstance(axesModel);
 	}
 	
-	public List<String> getMaterialsList() {
+	public List<LumberMaterial> getMaterialsList() {
 		
-		List<String> list = new ArrayList<String>();
+		List<LumberMaterial> list = new ArrayList<LumberMaterial>();
 		
 		Map<LumberType, Integer> counts = new HashMap<LumberType, Integer>();
 		for (LumberType type : LumberType.values()) {
@@ -216,22 +264,17 @@ public class FramingStudDesigner extends SimpleGame {
 			}
 		}
 		
-		NumberFormat formatter = NumberFormat.getCurrencyInstance();
-		
 		float total = 0;
 		for (LumberType type : LumberType.values()) {
 			int count = counts.get(type);
 			if (count < 1) continue;
 			float cost = count * type.getCost();
-			String moneyString = formatter.format(cost);
-			list.add(type.getName() + "  Count: " + count + "  Cost: " + moneyString);
+			list.add(new LumberMaterial(type.getName(), type, count, cost));
 			total += cost;
 		}
 
-		String moneyString = formatter.format(total);
-		
-		list.add("Total Cost: " + moneyString);
-		
+		list.add(new LumberMaterial("Total Cost", null, 0, total, Color.YELLOW));
+				
 		return list;
 	}
 

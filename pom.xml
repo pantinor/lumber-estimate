@@ -33,16 +33,6 @@
 
 	<dependencies>
 
-
-
-
-
-
-
-
-
-
-
 		<dependency>
 			<groupId>com.badlogicgames.gdx</groupId>
 			<artifactId>gdx</artifactId>
@@ -64,9 +54,13 @@
 			<artifactId>gdx-tools</artifactId>
 			<version>0.9.9-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
-
-
 
 	<build>
 		<plugins>
@@ -82,7 +76,7 @@
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
 
-							<mainClass>com.me.mygdxgame.MashupMain</mainClass>
+							<mainClass>org.antinori.lumber.FramingStudDesigner</mainClass>
 						</manifest>
 
 					</archive>
@@ -100,7 +94,7 @@
 
 					<archive>
 						<manifest>
-							<mainClass>com.me.mygdxgame.MashupMain</mainClass>
+							<mainClass>org.antinori.lumber.FramingStudDesigner</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

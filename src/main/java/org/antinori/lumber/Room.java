@@ -21,9 +21,9 @@ import com.badlogic.gdx.math.collision.BoundingBox;
 public class Room {
 	
 	public static boolean roomIsVisible = true;
-	public static boolean wallIsVisible = true;
-	public static boolean studIsVisible = true;
-	public static boolean studDebugIsVisible = false;
+	public static boolean wallIsVisible = false;
+	public static boolean studIsVisible = false;
+	public static boolean studDebugIsVisible = true;
 	
 	private Model model;
 	private ModelInstance instance;
@@ -379,6 +379,7 @@ public class Room {
 
 		}
 		
+		this.instance.transform.getTranslation(this.center);
 
 	}
 	
@@ -408,6 +409,8 @@ public class Room {
 			break;
 		
 		}
+		
+		
 	}
 
 	
