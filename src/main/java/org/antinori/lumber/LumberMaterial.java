@@ -8,7 +8,7 @@ public class LumberMaterial {
 	private LumberType type;
 	private int count;
 	private float cost;
-	private Color color = Color.BLACK;
+	private Color color = Color.WHITE;
 	
 	public LumberMaterial(String name, LumberType type, int count, float cost) {
 		this.name = name;
