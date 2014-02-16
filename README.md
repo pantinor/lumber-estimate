@@ -3,6 +3,8 @@ Lumber Estimator Tool
 
 Graphical 3D tool built on LIBGDX API that can visualize and estimate inventory and cost of lumber when framing out rooms of a house or structure.
 
+Note that this tool is designed to run on desktop display mode.
+
 ![screenshot of animated pieces](https://raw.github.com/pantinor/lumber-estimate/master/preview.png)
 
 After cloning this project, you will need to run command "mvn clean install" to build the binary zip archive.
