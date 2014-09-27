@@ -58,5 +58,68 @@ public class WallTest {
 		System.out.println(w6.toString());
 		Assert.assertEquals(w6.getVerticalPieces().size(),9);
 	}
+	
+	@Test
+	public void testReverseWords() throws Exception {
+		char[] sentence = "My name is Paul".toCharArray();
+		
+		reverseWords(sentence);
+		
+	}
+	
+	
+	private void reverseWords(char[] sentence) {
+		if (sentence == null)
+			return;
+		
+		// reverse the chars first pass
+		int pos1 = 0;
+		int pos2 = sentence.length - 1;
+		reverseArray(sentence, pos1, pos2);
+		
+		System.out.println(sentence);
+
+
+		// second pass - get each word and reverse chars
+		int startOfWordPos = 0;
+		int endOfWordPos = getPositionOfFirstSpace(sentence, 0) - 1;
+		
+		while (startOfWordPos < sentence.length) {
+			reverseArray(sentence, startOfWordPos, endOfWordPos);
+			System.out.println(sentence);
+
+			startOfWordPos = endOfWordPos + 2;
+			endOfWordPos = getPositionOfFirstSpace(sentence, startOfWordPos) - 1;
+		}
+		
+		System.out.println(sentence);
+
+
+	}
+	
+	private void reverseArray(char[] c, int pos1, int pos2) {
+		while (pos1 < pos2) {
+			swapChars(c, pos1, pos2);
+			pos1++;
+			pos2--;
+		}
+	}
+
+	private void swapChars(char[] c, int pos1, int pos2) {
+		char c1 = c[pos1];
+		char c2 = c[pos2];
+		c[pos1] = c2;
+		c[pos2] = c1;
+	}
+
+	private int getPositionOfFirstSpace(char[] c, int start) {
+		for (int x = start; x < c.length; x++) {
+			if (c[x] == ' ') {
+				return x;
+			}
+		}
+		return c.length;
+	}
+
 
 }

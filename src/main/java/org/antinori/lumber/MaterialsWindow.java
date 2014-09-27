@@ -29,6 +29,10 @@ public class MaterialsWindow extends Window {
 		for (LumberMaterial l : list) {
 			add(new Label(l.getName(), skin, "default-font", l.getColor()));
 			add(new Label(l.getCount()==0?"":l.getCount()+"", skin, "default-font", l.getColor()));
+			
+			String pc = l.getType()==null?"":"("+formatter.format(l.getType().getCost())+")";
+			
+			add(new Label(pc, skin, "default-font", l.getColor()));
 			add(new Label(formatter.format(l.getCost()), skin, "default-font", l.getColor()));
 			row();
 		}
