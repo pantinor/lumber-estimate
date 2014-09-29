@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -33,8 +33,6 @@ public class Room {
 	
 	private List<Wall> walls = new ArrayList<Wall>();
 	
-	public enum Move {MOVEXPLUS,MOVEYPLUS,MOVEZPLUS,MOVEXMINUS,MOVEYMINUS,MOVEZMINUS};
-
 	public Room(ModelBuilder modelBuilder, Color color, float x, float y, float z, float width, float height, float length) {
 		
 		this.center = new Vector3(x+width/2, y+height/2, z+length/2); //center of the box position
@@ -268,7 +266,7 @@ public class Room {
 		ModelBuilder modelBuilder = new ModelBuilder();
 		modelBuilder.begin();
 		
-		MeshPartBuilder builder = modelBuilder.part("box", GL10.GL_LINES, Usage.Position | Usage.Color, new Material());
+		MeshPartBuilder builder = modelBuilder.part("box", GL30.GL_LINES, Usage.Position | Usage.Color, new Material());
 		
 		builder.setColor(Color.GREEN);
 				

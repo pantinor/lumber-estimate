@@ -21,9 +21,6 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
 public abstract class TestMain extends InputAdapter implements ApplicationListener {
-	public boolean needsGL20 () {
-		return false;
-	}
 
 	public void create () {
 	}
@@ -46,7 +43,7 @@ public abstract class TestMain extends InputAdapter implements ApplicationListen
 	public static void main(String[] args) {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "test";
-		cfg.useGL20 = true;
+		cfg.useGL30 = false;
 		cfg.width = 1280;
 		cfg.height = 768;
 		new LwjglApplication(new Basic3DTest(), cfg);

@@ -1,4 +1,4 @@
-package org.antinori.lumber;
+package org.antinori.stone;
 
 
 import java.util.ArrayList;
@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.antinori.stone.StoneInstance;
+import org.antinori.lumber.Move;
+import org.antinori.lumber.SimpleGame;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
@@ -27,22 +28,25 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 
-public class FramingStudDesigner extends SimpleGame {
+public class PatioDesigner extends SimpleGame {
 	
 	public Environment environment;
 	
-	public Map<String, Room> boxes = new HashMap<String, Room>();
-	RoomSelectionPanel dialog;
+	public Map<String, StoneInstance> modelInstances = new HashMap<String, StoneInstance>();
+	StoneSelectionDialog dialog;
 	boolean fullscreen = false;
+	
+	ModelInstance patio = null;
+	
+	private static int[] PRESSED_KEYS = {Keys.F,Keys.G,Keys.H,Keys.V,Keys.B,Keys.N,Keys.LEFT,Keys.RIGHT};
 
 		
 	public static void main(String[] args) {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
-		cfg.title = "FramingStudDesigner";
-		cfg.useGL30 = false;
+		cfg.title = "PatioDesigner";
 		cfg.width = 1280;
 		cfg.height = 768;
-		new LwjglApplication(new FramingStudDesigner(), cfg);
+		new LwjglApplication(new PatioDesigner(), cfg);
 	}
 	
 
@@ -53,21 +57,22 @@ public class FramingStudDesigner extends SimpleGame {
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
 		modelBatch = new ModelBatch();
-
-		float width = 23*12;
-		float length = 18*12;
-		float height = 10*12;
 		
-		addRoom(0,0,0, width, height, length);
-		addRoom(0,0,20*12, 12*12, 10*12, 8*12);
+		ModelBuilder builder = new ModelBuilder();
+		final Material material = new Material(ColorAttribute.createDiffuse(Color.ORANGE));
+		final long attributes = Usage.Position | Usage.Normal | Usage.TextureCoordinates;
+		final Model cylinder = builder.createCylinder(12f*16f, 2f, 12f*16f, 32, material, attributes);
+		patio = new ModelInstance(cylinder, 0, 0, 0);
+		
+		addBlock(StoneType.LUXORA_6_X_6_WALL,0,0,0);
 					
 		createAxes();
 		
-		dialog = new RoomSelectionPanel(hud, this, skin);
+		dialog = new StoneSelectionDialog(hud, this, skin);
 		hud.addActor(dialog);
 		
-		cam.position.set(-250, 150, 0);
-		cam.lookAt(0,150,0);
+		cam.position.set(-150, 15, 0);
+		cam.lookAt(0,15,0);
 		
 	}
 
@@ -82,70 +87,99 @@ public class FramingStudDesigner extends SimpleGame {
 		hud.act(Gdx.graphics.getDeltaTime());
 
 		modelBatch.begin(cam);
+		
+		//modelBatch.render(patio, environment);
 				
-		for (Room box : boxes.values()) {
-			box.draw(modelBatch, environment);
+		for (StoneInstance i : modelInstances.values()) {
+			modelBatch.render(i.getInstance(), environment);
+			if (StoneInstance.showDebug) {
+				modelBatch.render(i.getDebugInstance(), environment);
+			}
 		}
 		
         modelBatch.render(axesInstance);
 
 		modelBatch.end();
+		
+		for (int k : PRESSED_KEYS) {
+			if (Gdx.input.isKeyPressed(k)) keyDown(k);
+		}
+		
+
 				
 	}
 	
-	public String addRoom(float x, float y, float z, float width, float height, float length) {
+	public String addBlock(StoneType st, float tx, float ty, float tz) {
 		int i = 1;
-		String name = "Room " + i;
+		String name = "inst " + i;
 		do {
-			if (!boxes.containsKey(name)) {
+			if (!modelInstances.containsKey(name)) {
 				break;
 			}
-			name = "Room " + (i++);
+			name = "inst " + (i++);
 		} while (true);
 		
 		ModelBuilder builder = new ModelBuilder();
+		Model model = createPolygonBox(builder, st, Color.BLUE);
+		ModelInstance instance = new ModelInstance(model, tx, ty, tz);
 
-		Room room = new Room(builder, Color.BLUE, x,y,z, width, height, length);
-		boxes.put(name, room);
+		StoneInstance si = new StoneInstance(instance, st);
+		modelInstances.put(name, si);
 		
 		return name;
+	}
+	
+	public Model createPolygonBox(ModelBuilder mb, StoneType st, Color color) {
+		return createPolygonBox(mb, color, st.getC000(), st.getC010(), st.getC100(), st.getC110(), st.getC001(), st.getC011(), st.getC101(), st.getC111());
+	}
+
+	public Model createPolygonBox(ModelBuilder modelBuilder, Color color, Vector3 corner000, Vector3 corner010, Vector3 corner100, Vector3 corner110, Vector3 corner001, Vector3 corner011, Vector3 corner101, Vector3 corner111) {
+		modelBuilder.begin();
+		modelBuilder.part("box", GL30.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(color))).box(corner000, corner010, corner100, corner110, corner001, corner011, corner101, corner111);
+		return modelBuilder.end();
 	}
 	
 	@Override
 	public boolean keyDown (int keycode) {
 		
 		if (dialog.dropdown.getSelected() != null) {
-			
+		
 			String key = dialog.dropdown.getSelected().toString();
-			Room room = boxes.get(key);
+			StoneInstance si = modelInstances.get(key);
 	
 			if (keycode == Keys.X) {
 				
-				room.move(Move.MOVEYMINUS);
+				si.move(Move.MOVEYMINUS);
 				
-			} else if (keycode == Keys.S) {
+			} else if (keycode == Keys.S || keycode == Keys.G) {
 				
-				room.move(Move.MOVEYPLUS);
+				si.move(Move.MOVEYPLUS);
 				
-			} else if (keycode == Keys.C) {
+			} else if (keycode == Keys.C || keycode == Keys.N) {
 				
-				room.move(Move.MOVEZMINUS);
+				si.move(Move.MOVEZMINUS);
 				
-			} else if (keycode == Keys.D) {
+			} else if (keycode == Keys.D || keycode == Keys.H) {
 				
-				room.move(Move.MOVEZPLUS);
+				si.move(Move.MOVEZPLUS);
 				
-			} else if (keycode == Keys.Z) {
+			} else if (keycode == Keys.Z || keycode == Keys.V) {
 				
-				room.move(Move.MOVEXMINUS);
+				si.move(Move.MOVEXMINUS);
 				
-			} else if (keycode == Keys.A) {
+			} else if (keycode == Keys.A || keycode == Keys.F) {
 				
-				room.move(Move.MOVEXPLUS);
+				si.move(Move.MOVEXPLUS);
 				
+			} else if (keycode == Keys.LEFT) {
+				
+				si.turn(true);
+				
+			} else if (keycode == Keys.RIGHT) {
+				
+				si.turn(false);
 			}
 		}
-		
 			
 		if (keycode == Keys.NUMPAD_0) {
 			
@@ -156,32 +190,32 @@ public class FramingStudDesigner extends SimpleGame {
 		} else if (keycode == Keys.NUMPAD_4) {
 			
 			cam.position.set(cam.position.x+5*12,cam.position.y,cam.position.z);
-			lookAtSelectedRoom();
+			lookAtSelectedBlock();
 			
 		} else if (keycode == Keys.NUMPAD_1) {
 			
 			cam.position.set(cam.position.x-5*12,cam.position.y,cam.position.z);
-			lookAtSelectedRoom();
+			lookAtSelectedBlock();
 			
 		} else if (keycode == Keys.NUMPAD_5) {
 			
 			cam.position.set(cam.position.x,cam.position.y+5*12,cam.position.z);
-			lookAtSelectedRoom();
+			lookAtSelectedBlock();
 
 		} else if (keycode == Keys.NUMPAD_2) {
 			
 			cam.position.set(cam.position.x,cam.position.y-5*12,cam.position.z);
-			lookAtSelectedRoom();
+			lookAtSelectedBlock();
 
 		} else if (keycode == Keys.NUMPAD_6) {
 			
 			cam.position.set(cam.position.x,cam.position.y,cam.position.z+5*12);
-			lookAtSelectedRoom();
+			lookAtSelectedBlock();
 			
 		} else if (keycode == Keys.NUMPAD_3) {
 			
 			cam.position.set(cam.position.x,cam.position.y,cam.position.z-5*12);
-			lookAtSelectedRoom();
+			lookAtSelectedBlock();
 			
 		} else if (keycode == Keys.ESCAPE) {
 			
@@ -199,17 +233,15 @@ public class FramingStudDesigner extends SimpleGame {
 		return false;
 	}
 	
-	private void lookAtSelectedRoom() {
+	private void lookAtSelectedBlock() {
 		
 		if (dialog.dropdown.getSelected() != null) {
 			
 			String key = dialog.dropdown.getSelected().toString();
-			Room room = boxes.get(key);
+			StoneInstance si = modelInstances.get(key);
+			
 			Vector3 tmp = new Vector3();
-			room.getInstance().transform.getTranslation(tmp);
-			//cam.normalizeUp();
-			//cam.lookAt(tmp);
-			//cam.up.nor();
+			si.getInstance().transform.getTranslation(tmp);
 			 
 			cam.update();
 		}
@@ -227,14 +259,14 @@ public class FramingStudDesigner extends SimpleGame {
 		ModelBuilder modelBuilder = new ModelBuilder();
 		modelBuilder.begin();
 		// grid
-		MeshPartBuilder builder = modelBuilder.part("grid", GL30.GL_LINES, Usage.Position | Usage.Color, new Material());
+		MeshPartBuilder builder = modelBuilder.part("grid", GL30.GL_LINES, Usage.Position | Usage.ColorUnpacked, new Material());
 		builder.setColor(Color.LIGHT_GRAY);
 		for (float t = GRID_MIN; t <= GRID_MAX; t += GRID_STEP) {
 			builder.line(t, 0, GRID_MIN, t, 0, GRID_MAX);
 			builder.line(GRID_MIN, 0, t, GRID_MAX, 0, t);
 		}
 		// axes
-		builder = modelBuilder.part("axes", GL30.GL_LINES, Usage.Position | Usage.Color, new Material());
+		builder = modelBuilder.part("axes", GL30.GL_LINES, Usage.Position | Usage.ColorUnpacked, new Material());
 		builder.setColor(Color.RED);
 		builder.line(0, 0, 0, 500, 0, 0);
 		builder.setColor(Color.GREEN);
@@ -245,49 +277,32 @@ public class FramingStudDesigner extends SimpleGame {
 		axesInstance = new ModelInstance(axesModel);
 	}
 	
-	public List<LumberMaterial> getMaterialsList() {
+	public List<StoneMaterial> getMaterialsList() {
 		
-		List<LumberMaterial> list = new ArrayList<LumberMaterial>();
+		List<StoneMaterial> list = new ArrayList<StoneMaterial>();
 		
-		Map<LumberType, Integer> counts = new HashMap<LumberType, Integer>();
-		for (LumberType type : LumberType.values()) {
+		Map<StoneType, Integer> counts = new HashMap<StoneType, Integer>();
+		for (StoneType type : StoneType.values()) {
 			counts.put(type, 0);
 		}
 
-		for (String name : boxes.keySet()) {
-			Room room = boxes.get(name);
-			for (Wall wall : room.getWalls()) {
-				for (Lumber l : wall.getTopPieces()) {
-					LumberType type = l.getType();
-					int c = counts.get(type);
-					c ++;
-					counts.put(type, c);
-				}
-				for (Lumber l : wall.getBottomPieces()) {
-					LumberType type = l.getType();
-					int c = counts.get(type);
-					c ++;
-					counts.put(type, c);
-				}
-				for (Lumber l : wall.getVerticalPieces()) {
-					LumberType type = l.getType();
-					int c = counts.get(type);
-					c ++;
-					counts.put(type, c);
-				}
-			}
+		for (StoneInstance si : modelInstances.values()) {
+			StoneType type = si.getType();
+			int c = counts.get(type);
+			c ++;
+			counts.put(type, c);
 		}
 		
 		float total = 0;
-		for (LumberType type : LumberType.values()) {
+		for (StoneType type : StoneType.values()) {
 			int count = counts.get(type);
 			if (count < 1) continue;
 			float cost = count * type.getCost();
-			list.add(new LumberMaterial(type.getName(), type, count, cost));
+			list.add(new StoneMaterial(type.getName(), type, count, cost));
 			total += cost;
 		}
 
-		list.add(new LumberMaterial("Total Cost", null, 0, total, Color.YELLOW));
+		list.add(new StoneMaterial("Total Cost", null, 0, total, Color.YELLOW));
 				
 		return list;
 	}

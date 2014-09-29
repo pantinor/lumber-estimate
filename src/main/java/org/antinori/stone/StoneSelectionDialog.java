@@ -1,4 +1,7 @@
-package org.antinori.lumber;
+package org.antinori.stone;
+
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input.Keys;
@@ -20,25 +23,24 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
-public class RoomSelectionPanel extends Window {
+public class StoneSelectionDialog extends Window {
 	
 	static int tfWidth = 35;
 	static int btnWidth = 35;
 	
-	final private FramingStudDesigner main;
+	final private PatioDesigner main;
 	
 	final private TextField tfx ;
 	final private TextField tfy ;
 	final private TextField tfz ;
-	final private TextField tfw ;
-	final private TextField tfh ;
-	final private TextField tfl ;
 	
+	final public SelectBox typeDropdown;
 	final public SelectBox dropdown;
-	
+
 	private MaterialsWindow materials;
+	private PointsWindow points;
 			
-	public RoomSelectionPanel(final Stage stage, FramingStudDesigner main, Skin skin) {
+	public StoneSelectionDialog(final Stage stage, PatioDesigner main, Skin skin) {
 				
 		super("Edit", skin);
 		
@@ -47,57 +49,21 @@ public class RoomSelectionPanel extends Window {
 				
 		defaults().padTop(5).padBottom(5).padLeft(5).padRight(5).left();
 
-		
-		final CheckBox showRooms = new CheckBox(" Show Rooms", skin);
-		final CheckBox showWalls = new CheckBox(" Show Walls", skin);
-		final CheckBox showStuds = new CheckBox(" Show Studs", skin);
-		final CheckBox showDebugStuds = new CheckBox(" Show Stud Outlines", skin);
-		
+		final CheckBox showDebug = new CheckBox(" Show Outlines", skin);
 		final CheckBox showMaterials = new CheckBox(" Show Materials", skin);
+		final CheckBox showPoints = new CheckBox(" Show Points", skin);
 
-		
-		showRooms.setChecked(Room.roomIsVisible);
-		showWalls.setChecked(Room.wallIsVisible);
-		showStuds.setChecked(Room.studIsVisible);
-		showDebugStuds.setChecked(Room.studDebugIsVisible);
+		showDebug.setChecked(true);
+		showMaterials.setChecked(false);
+		showPoints.setChecked(false);
 
-		
-		showRooms.addListener(new ChangeListener() {
+	
+		showDebug.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
-				if (showRooms.isChecked()) {
-					Room.roomIsVisible = true;
+				if (showDebug.isChecked()) {
+					StoneInstance.showDebug = true;
 				} else {
-					Room.roomIsVisible = false;
-				}
-			}
-		});
-		
-		showWalls.addListener(new ChangeListener() {
-			public void changed (ChangeEvent event, Actor actor) {
-				if (showWalls.isChecked()) {
-					Room.wallIsVisible = true;
-				} else {
-					Room.wallIsVisible = false;
-				}
-			}
-		});
-		
-		showStuds.addListener(new ChangeListener() {
-			public void changed (ChangeEvent event, Actor actor) {
-				if (showStuds.isChecked()) {
-					Room.studIsVisible = true;
-				} else {
-					Room.studIsVisible = false;
-				}
-			}
-		});
-		
-		showDebugStuds.addListener(new ChangeListener() {
-			public void changed (ChangeEvent event, Actor actor) {
-				if (showDebugStuds.isChecked()) {
-					Room.studDebugIsVisible = true;
-				} else {
-					Room.studDebugIsVisible = false;
+					StoneInstance.showDebug = false;
 				}
 			}
 		});
@@ -105,9 +71,19 @@ public class RoomSelectionPanel extends Window {
 		showMaterials.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
 				if (showMaterials.isChecked()) {
-					materials = new MaterialsWindow(RoomSelectionPanel.this.main.hud, RoomSelectionPanel.this.main, RoomSelectionPanel.this.main.skin);
+					materials = new MaterialsWindow(StoneSelectionDialog.this.main.hud, StoneSelectionDialog.this.main, StoneSelectionDialog.this.main.skin);
 				} else {
-					materials.remove();
+					if (materials != null) materials.remove();
+				}
+			}
+		});
+		
+		showPoints.addListener(new ChangeListener() {
+			public void changed (ChangeEvent event, Actor actor) {
+				if (showPoints.isChecked()) {
+					points = new PointsWindow(StoneSelectionDialog.this.main.hud, StoneSelectionDialog.this.main, StoneSelectionDialog.this.main.skin);
+				} else {
+					if (points != null) points.remove();
 				}
 			}
 		});
@@ -115,13 +91,9 @@ public class RoomSelectionPanel extends Window {
 		tfx = createTextField("", skin);
 		tfy = createTextField("", skin);
 		tfz = createTextField("", skin);
-		tfw = createTextField("", skin);
-		tfh = createTextField("", skin);
-		tfl = createTextField("", skin);
 		
-		
-		Button addRoom = createButton("Add Room", skin, createAddRoomListener());
-		Button deleteRoom = createButton("Delete Room", skin, createDeleteRoomListener());
+		Button add = createButton("Add", skin, createAddListener());
+		Button delete = createButton("Delete", skin, createDeleteListener());
 		
 		Button mxm = createButton("X -", skin, createMoveListener(Keys.Z));
 		Button mxp = createButton("X +", skin, createMoveListener(Keys.A));
@@ -130,68 +102,59 @@ public class RoomSelectionPanel extends Window {
 		Button mzm = createButton("Z -", skin, createMoveListener(Keys.C));
 		Button mzp = createButton("Z +", skin, createMoveListener(Keys.D));
 		
-		String[] names = main.boxes.keySet().toArray(new String[0]);
 		
+		typeDropdown = new SelectBox(skin);
+		typeDropdown.setItems(StoneType.values());
+		
+		String[] names = main.modelInstances.keySet().toArray(new String[0]);
 		dropdown = new SelectBox(skin);
 		dropdown.setItems(names);
-		
 		dropdown.addListener(new ChangeListener() {
 			public void changed (ChangeEvent event, Actor actor) {
 				String selected = dropdown.getSelected().toString();
 
-				Room room = RoomSelectionPanel.this.main.boxes.get(selected);
+				StoneInstance si = StoneSelectionDialog.this.main.modelInstances.get(selected);
 				Vector3 tmp = new Vector3();
-				room.getInstance().transform.getTranslation(tmp);
+				si.getInstance().transform.getTranslation(tmp);
 
-				RoomSelectionPanel.this.main.cam.position.set(tmp.x-250,tmp.y+150,tmp.z-250);
-				RoomSelectionPanel.this.main.cam.lookAt(tmp);
+				StoneSelectionDialog.this.main.cam.position.set(tmp.x-25,tmp.y+15,tmp.z-25);
+				StoneSelectionDialog.this.main.cam.lookAt(tmp);
 
-				RoomSelectionPanel.this.main.cam.update();
+				StoneSelectionDialog.this.main.cam.update();
 			}
-		});
+		});		
 		
-		
-		
-		
-
-		add(showRooms).colspan(2);
-		add(showWalls).colspan(2);
-		row();
-		
-		add(showDebugStuds).colspan(2);
-		add(showStuds).colspan(2);
+		add(showDebug).colspan(2);
 		row();
 		
 		add(showMaterials).colspan(4);
 		row();
 		
-		//add().space(3).colspan(4);
-		//row();
-		
-		Table addRoomTable = new Table();
-		addRoomTable.defaults().padTop(2).padBottom(2).padLeft(2).padRight(2).left();
-		
-		addRoomTable.add(new Label("Pos (X,Y,Z) inches:",skin)).space(3);
-		addRoomTable.add(tfx).maxWidth(tfWidth).width(tfWidth);
-		addRoomTable.add(tfy).maxWidth(tfWidth).width(tfWidth);
-		addRoomTable.add(tfz).maxWidth(tfWidth).width(tfWidth);
-		addRoomTable.row();
-		
-		addRoomTable.add(new Label("Dim (W,H,L) feet:",skin)).space(3);
-		addRoomTable.add(tfw).maxWidth(tfWidth).width(tfWidth);
-		addRoomTable.add(tfh).maxWidth(tfWidth).width(tfWidth);
-		addRoomTable.add(tfl).maxWidth(tfWidth).width(tfWidth);
-		addRoomTable.row();
-		
-		addRoomTable.add(addRoom).maxWidth(75).width(75).colspan(4);
-		
-		add(addRoomTable).colspan(4);
+		add(showPoints).colspan(4);
 		row();
 		
-		//add().space(3).colspan(4);
-		//row();
 		
-		add(new Label("Select Room:",skin)).fillX().colspan(4);
+		Table addBlockTable = new Table();
+		addBlockTable.defaults().padTop(2).padBottom(2).padLeft(2).padRight(2).left();
+		
+		addBlockTable.add(new Label("Block Type:",skin)).space(3);
+		addBlockTable.add(typeDropdown).fillX().colspan(4);
+		addBlockTable.row();
+		
+		addBlockTable.add(new Label("Pos (X,Y,Z) inches:",skin)).space(3);
+		addBlockTable.add(tfx).maxWidth(tfWidth).width(tfWidth);
+		addBlockTable.add(tfy).maxWidth(tfWidth).width(tfWidth);
+		addBlockTable.add(tfz).maxWidth(tfWidth).width(tfWidth);
+		addBlockTable.row();
+		
+		
+		addBlockTable.add(add).maxWidth(75).width(75).colspan(4);
+		
+		add(addBlockTable).colspan(4);
+		row();
+
+		
+		add(new Label("Select Instance:",skin)).fillX().colspan(4);
 		row();
 		
 		add(dropdown).fillX().colspan(4);
@@ -203,7 +166,7 @@ public class RoomSelectionPanel extends Window {
 		add(mzp).maxWidth(btnWidth).width(btnWidth);
 		row();
 		
-		add(deleteRoom);//.colspan(1);
+		add(delete);
 		add(mxm).maxWidth(btnWidth).width(btnWidth);
 		add(mym).maxWidth(btnWidth).width(btnWidth);
 		add(mzm).maxWidth(btnWidth).width(btnWidth);
@@ -243,23 +206,23 @@ public class RoomSelectionPanel extends Window {
 		return btn;	
 	}
 	
-	private InputListener createAddRoomListener() {
+	private InputListener createAddListener() {
 		InputListener listener = new InputListener() {
 			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
 				
 				try {
+					
+					if (StringUtils.isBlank(tfx.getText()) || StringUtils.isBlank(tfy.getText()) || StringUtils.isBlank(tfz.getText())) return false;
 				
 					float tx = Float.parseFloat(tfx.getText());
 					float ty = Float.parseFloat(tfy.getText());
 					float tz = Float.parseFloat(tfz.getText());
-					float tw = Float.parseFloat(tfw.getText());
-					float th = Float.parseFloat(tfh.getText());
-					float tl = Float.parseFloat(tfl.getText());
 	
-					main.addRoom(tx,ty,tz,tw*12,th*12,tl*12);
+					main.addBlock(StoneType.valueOf(typeDropdown.getSelected().toString()), tx, ty, tz);
 	
-					String[] names = main.boxes.keySet().toArray(new String[0]);
+					String[] names = main.modelInstances.keySet().toArray(new String[0]);
 					dropdown.setItems(names);
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -271,15 +234,15 @@ public class RoomSelectionPanel extends Window {
 		return listener;
 	}
 	
-	private InputListener createDeleteRoomListener() {
+	private InputListener createDeleteListener() {
 		InputListener listener = new InputListener() {
 			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
 				
 				String selected = dropdown.getSelected().toString();
 
-				main.boxes.remove(selected);
+				main.modelInstances.remove(selected);
 				
-				String[] names = main.boxes.keySet().toArray(new String[0]);
+				String[] names = main.modelInstances.keySet().toArray(new String[0]);
 				dropdown.setItems(names);
 				
 				return false;
@@ -304,19 +267,19 @@ public class RoomSelectionPanel extends Window {
 		InputListener listener = new InputListener() {
 			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
 				try {
-					FileHandle file = Gdx.files.local("lumber-project.save");
+					FileHandle file = Gdx.files.local("stone-project.save");
 					StringBuffer sb = new StringBuffer();
-					for (String name : main.boxes.keySet()) {
-						Room room = main.boxes.get(name);
-						BoundingBox box = room.getInstance().calculateBoundingBox(new BoundingBox());
+					for (String name : main.modelInstances.keySet()) {
+						StoneInstance si = main.modelInstances.get(name);
+						BoundingBox box = si.getInstance().calculateBoundingBox(new BoundingBox());
 						Vector3 dims = box.getDimensions();
-						sb.append(name + "," + 
-									(room.getCenter().x - dims.x/2) + "," + 
-									(room.getCenter().y - dims.y/2) + "," + 
-									(room.getCenter().z - dims.z/2) + "," + 
-									dims.x + "," + 
-									dims.y + "," + 
-									dims.z + "\n");
+//						sb.append(name + "," + 
+//									(si.getCenter().x - dims.x/2) + "," + 
+//									(si.getCenter().y - dims.y/2) + "," + 
+//									(si.getCenter().z - dims.z/2) + "," + 
+//									dims.x + "," + 
+//									dims.y + "," + 
+//									dims.z + "\n");
 					}
 					file.writeString(sb.toString(), false);
 				} catch (Exception e) {
@@ -334,7 +297,7 @@ public class RoomSelectionPanel extends Window {
 			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
 
 				try {
-					FileHandle file = Gdx.files.local("lumber-project.save");
+					FileHandle file = Gdx.files.local("stone-project.save");
 					String text = file.readString();
 					String[] rooms = text.split("\\r?\\n");
 					for (String room : rooms) {
@@ -342,13 +305,10 @@ public class RoomSelectionPanel extends Window {
 						float tx = Float.parseFloat(params[1]);
 						float ty = Float.parseFloat(params[2]);
 						float tz = Float.parseFloat(params[3]);
-						float tw = Float.parseFloat(params[4]);
-						float th = Float.parseFloat(params[5]);
-						float tl = Float.parseFloat(params[6]);
-						main.addRoom(tx, ty, tz, tw, th, tl);
+						main.addBlock(StoneType.LUXORA_3P8_X_8P6_WALL, tx, ty, tz);
 					}
 					
-					String[] names = main.boxes.keySet().toArray(new String[0]);
+					String[] names = main.modelInstances.keySet().toArray(new String[0]);
 					dropdown.setItems(names);
 					
 				} catch (Exception e) {

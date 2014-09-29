@@ -4,25 +4,28 @@ import com.badlogic.gdx.math.Vector3;
 
 public enum StoneType {
 	
-	LUXORA_3P8_X_8P6_WALL("Luxora 3.8-in x 8.6-in Wall", new Vector3(0,0,0), new Vector3(0,0,8.6f), new Vector3(7.5f,0,1.25f), new Vector3(7.5f,0,7.35f),
-														new Vector3(0,3.8f,0), new Vector3(0,3.8f,8.6f), new Vector3(7.5f,3.8f,1.25f), new Vector3(7.5f,3.8f,7.35f)),
+	LUXORA_3P8_X_8P6_WALL("Luxora 3.8-in x 8.6-in Wall", 
+			new Vector3(-4,-2,-4), new Vector3(-4,-2,4.6f), new Vector3(3.5f,-2,-2.75f), new Vector3(3.5f,-2,3.35f),
+			new Vector3(-4,1.8f,-4), new Vector3(-4,1.8f,4.6f), new Vector3(3.5f,1.8f,-2.75f), new Vector3(3.5f,1.8f,3.35f), 4.55f),
 														
-	LUXORA_6_X_16_WALL("Luxora 6-in x 16-in Wall", new Vector3(0,0,0), new Vector3(0,0,14f), new Vector3(10f,0,-2f), new Vector3(10f,0,14f),
-													new Vector3(0,6f,0), new Vector3(0,6f,14f), new Vector3(10f,6f,-2f), new Vector3(10f,6f,14f)),
+	LUXORA_6_X_16_WALL("Luxora 6-in x 16-in Wall", 
+			new Vector3(-5,-3,-7), new Vector3(-5,-3,7), new Vector3(5,-3,-9), new Vector3(5,-3,7),
+			new Vector3(-5,3,-7), new Vector3(-5,3,7), new Vector3(5,3,-9), new Vector3(5,3,7), 4.55f),
 													
-	LUXORA_6_X_6_WALL("Luxora 6-in x 6-in Wall", new Vector3(0,0,0), new Vector3(0,0,4f), new Vector3(10f,0,0f), new Vector3(10f,0,6f),
-												new Vector3(0,6f,0), new Vector3(0,6f,4f), new Vector3(10f,6f,0f), new Vector3(10f,6f,6f)),
+	LUXORA_6_X_6_WALL("Luxora 6-in x 6-in Wall", 
+			new Vector3(-5,-3,-2), new Vector3(-5,-3,2), new Vector3(5,-3,-2), new Vector3(5,-3,4),
+			new Vector3(-5,3,-2), new Vector3(-5,3,2), new Vector3(5,3,-2), new Vector3(5,3,4), 4.55f),
 												
-	LUXORA_3_CAP("Luxora 3-in Cap", new Vector3(0,0,0), new Vector3(0,0,12f), new Vector3(11f,0,1f), new Vector3(11f,0,11f),
-									new Vector3(0,3f,0), new Vector3(0,3f,12f), new Vector3(11f,3f,1f), new Vector3(11f,3f,11f)),
+	LUXORA_3_CAP("Luxora 3-in Cap", 
+			new Vector3(0,0,0), new Vector3(0,0,12f), new Vector3(11f,0,1f), new Vector3(11f,0,11f),
+			new Vector3(0,3f,0), new Vector3(0,3f,12f), new Vector3(11f,3f,1f), new Vector3(11f,3f,11f), 4.55f),
 									
-	BERTRAM_3P5_X_11P5_WALL("Bertram 3.5-in x 11.5-in Wall", new Vector3(0,0,0), new Vector3(0,0,11.5f), new Vector3(7.5f,0,0f), new Vector3(7.5f,0,11.5f),
-															new Vector3(0,3.5f,0), new Vector3(0,3.5f,11.5f), new Vector3(7.5f,3.5f,0f), new Vector3(7.5f,3.5f,11.5f)),
-	
-	DUMMY("Dummy", new Vector3(0,0,0), new Vector3(0,0,0), new Vector3(0,0,0), new Vector3(0,0,0),
-			new Vector3(0,0,0), new Vector3(0,0,0), new Vector3(0,0,0), new Vector3(0,0,0));
+	BERTRAM_3P5_X_11P5_WALL("Bertram 3.5-in x 11.5-in Wall", 
+			new Vector3(0,0,0), new Vector3(0,0,11.5f), new Vector3(7.5f,0,0f), new Vector3(7.5f,0,11.5f),
+			new Vector3(0,3.5f,0), new Vector3(0,3.5f,11.5f), new Vector3(7.5f,3.5f,0f), new Vector3(7.5f,3.5f,11.5f), 4.55f);
 	
 	private String name;
+	private float cost;
 	
 	private Vector3 c000;//bottom front left
 	private Vector3 c001;//bottom front right
@@ -34,7 +37,8 @@ public enum StoneType {
 	private Vector3 c110;//top back left
 	private Vector3 c111;//top back right
 		
-	private StoneType(String name, Vector3 c000, Vector3 c001, Vector3 c100, Vector3 c101, Vector3 c010, Vector3 c011, Vector3 c110, Vector3 c111) {
+	private StoneType(String name, Vector3 c000, Vector3 c001, Vector3 c100, Vector3 c101, 
+			Vector3 c010, Vector3 c011, Vector3 c110, Vector3 c111, float cost) {
 		this.name = name;
 		this.c000 = c000;
 		this.c010 = c010;
@@ -44,6 +48,7 @@ public enum StoneType {
 		this.c011 = c011;
 		this.c101 = c101;
 		this.c111 = c111;
+		this.cost = cost;
 	}
 
 
@@ -137,7 +142,9 @@ public enum StoneType {
 	}
 		
 
-	
+	public float getCost() {
+		return cost;
+	}
 	
 	
 

@@ -19,7 +19,7 @@ import org.antinori.stone.StoneType;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -34,6 +34,7 @@ import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 
 public class Basic3DTest extends TestMain {
 	public PerspectiveCamera cam;
@@ -73,11 +74,15 @@ public class Basic3DTest extends TestMain {
 //
 //		model = createPolygonBox(modelBuilder, Color.GREEN, c1, c2, c3, c4, c5, c6, c7, c8);
 
-		model = createPolygonBox(modelBuilder, StoneType.LUXORA_6_X_6_WALL, Color.GREEN);
+		model = createPolygonBox(modelBuilder, StoneType.BERTRAM_3P5_X_11P5_WALL, Color.GREEN);
 
 		
 		instance = new ModelInstance(model);
 		//instance = createDebugBoxOutline(c1, c2, c3, c4, c5, c6, c7, c8);
+		
+		BoundingBox bbox = new BoundingBox();
+		instance.calculateBoundingBox(bbox);
+		instance.transform.setToRotation(Vector3.Y, 35).trn(0, -bbox.min.y, 0);
 		
 
 		Gdx.input.setInputProcessor(new InputMultiplexer(this, inputController = new CameraInputController(cam)));
@@ -89,7 +94,7 @@ public class Basic3DTest extends TestMain {
 
 	public Model createPolygonBox(ModelBuilder modelBuilder, Color color, Vector3 corner000, Vector3 corner010, Vector3 corner100, Vector3 corner110, Vector3 corner001, Vector3 corner011, Vector3 corner101, Vector3 corner111) {
 		modelBuilder.begin();
-		modelBuilder.part("box", GL10.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(color))).box(corner000, corner010, corner100, corner110, corner001, corner011, corner101, corner111);
+		modelBuilder.part("box", GL30.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(color))).box(corner000, corner010, corner100, corner110, corner001, corner011, corner101, corner111);
 		return modelBuilder.end();
 	}
 
@@ -98,7 +103,7 @@ public class Basic3DTest extends TestMain {
 		inputController.update();
 
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+		Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
 
 		modelBatch.begin(cam);
 		modelBatch.render(instance, environment);
@@ -134,7 +139,7 @@ public class Basic3DTest extends TestMain {
 		ModelBuilder modelBuilder = new ModelBuilder();
 		modelBuilder.begin();
 
-		MeshPartBuilder builder = modelBuilder.part("box", GL10.GL_LINES, Usage.Position | Usage.Color, new Material());
+		MeshPartBuilder builder = modelBuilder.part("box", GL30.GL_LINES, Usage.Position | Usage.Color, new Material());
 
 		builder.setColor(Color.MAGENTA);
 

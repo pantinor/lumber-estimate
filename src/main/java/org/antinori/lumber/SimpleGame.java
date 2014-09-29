@@ -19,9 +19,9 @@ public abstract class SimpleGame implements ApplicationListener, InputProcessor 
 	
 	public final static int PREF_HUDWIDTH = 640;
 	public final static int PREF_HUDHEIGHT = 480;
-	protected Stage hud;
+	public Stage hud;
 	protected float hudWidth, hudHeight;
-	protected Skin skin;
+	public Skin skin;
 
 	public SimpleGame() {
 	}
@@ -33,8 +33,6 @@ public abstract class SimpleGame implements ApplicationListener, InputProcessor 
 	public void create() {
 		
 		cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		cam.position.set(-100, 150, -100);
-		cam.lookAt(150,0,150);
 		cam.near = 0.1f;
 		cam.far = 1000f;
 		cam.update();
