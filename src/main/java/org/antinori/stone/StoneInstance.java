@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 
 public class StoneInstance {
@@ -21,16 +22,16 @@ public class StoneInstance {
 	private Color color = Color.BLUE; 
 
 	public static boolean showDebug = true;
+	
+	public StoneInstance() {
+	}
 
 	public StoneInstance(ModelInstance instance, StoneType type) {
 		super();
 		this.instance = instance;
 		this.type = type;
-		
-		Vector3 tmp = new Vector3();
-		instance.transform.getTranslation(tmp);
 
-		createDebugBoxOutline(tmp);
+		createDebugBoxOutline(instance.transform);
 	}
 	
 	public ModelInstance getInstance() {
@@ -69,7 +70,7 @@ public class StoneInstance {
 	}
 	
 	
-	private void createDebugBoxOutline(Vector3 center) {
+	private void createDebugBoxOutline(Matrix4 center) {
 
 		Model model = null;
 
@@ -111,34 +112,34 @@ public class StoneInstance {
 		inst.transform.rotate(new Vector3(0, 1, 0), turnLeft? 1 : -1);
 	}
 	
-	public void move(Move move) {
-		move(move, this.instance);
-		move(move, this.debugInstance);
+	public void move(Move move, float inc) {
+		move(move, this.instance,inc);
+		move(move, this.debugInstance,inc);
 	}
 	
-	private void move(Move move, ModelInstance inst) {
+	private void move(Move move, ModelInstance inst, float inc) {
 		
 		Vector3 tmp = new Vector3();
 		inst.transform.getTranslation(tmp);
 		
 		switch (move) {
 		case MOVEXMINUS:
-			inst.transform.setTranslation(tmp.x-1,tmp.y,tmp.z);
+			inst.transform.setTranslation(tmp.x-inc,tmp.y,tmp.z);
 			break;
 		case MOVEXPLUS:
-			inst.transform.setTranslation(tmp.x+1,tmp.y,tmp.z);
+			inst.transform.setTranslation(tmp.x+inc,tmp.y,tmp.z);
 			break;
 		case MOVEYMINUS:
-			inst.transform.setTranslation(tmp.x,tmp.y-1,tmp.z);			
+			inst.transform.setTranslation(tmp.x,tmp.y-inc,tmp.z);			
 			break;
 		case MOVEYPLUS:
-			inst.transform.setTranslation(tmp.x,tmp.y+1,tmp.z);
+			inst.transform.setTranslation(tmp.x,tmp.y+inc,tmp.z);
 			break;
 		case MOVEZMINUS:
-			inst.transform.setTranslation(tmp.x,tmp.y,tmp.z-1);
+			inst.transform.setTranslation(tmp.x,tmp.y,tmp.z-inc);
 			break;
 		case MOVEZPLUS:
-			inst.transform.setTranslation(tmp.x,tmp.y,tmp.z+1);
+			inst.transform.setTranslation(tmp.x,tmp.y,tmp.z+inc);
 			break;
 		default:
 			break;

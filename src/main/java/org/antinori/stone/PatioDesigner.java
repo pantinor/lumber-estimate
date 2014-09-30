@@ -44,8 +44,8 @@ public class PatioDesigner extends SimpleGame {
 	public static void main(String[] args) {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "PatioDesigner";
-		cfg.width = 1280;
-		cfg.height = 768;
+		cfg.width = 1800;
+		cfg.height = 1100;
 		new LwjglApplication(new PatioDesigner(), cfg);
 	}
 	
@@ -64,7 +64,7 @@ public class PatioDesigner extends SimpleGame {
 		final Model cylinder = builder.createCylinder(12f*16f, 2f, 12f*16f, 32, material, attributes);
 		patio = new ModelInstance(cylinder, 0, 0, 0);
 		
-		addBlock(StoneType.LUXORA_6_X_6_WALL,0,0,0);
+		addBlock(StoneType.BERTRAM_3P5_X_11P5_WALL,0,0,0);
 					
 		createAxes();
 		
@@ -88,7 +88,7 @@ public class PatioDesigner extends SimpleGame {
 
 		modelBatch.begin(cam);
 		
-		//modelBatch.render(patio, environment);
+		modelBatch.render(patio, environment);
 				
 		for (StoneInstance i : modelInstances.values()) {
 			modelBatch.render(i.getInstance(), environment);
@@ -148,76 +148,47 @@ public class PatioDesigner extends SimpleGame {
 			StoneInstance si = modelInstances.get(key);
 	
 			if (keycode == Keys.X) {
+				si.move(Move.MOVEYMINUS,.05f);
+			} else if (keycode == Keys.S) {
+				si.move(Move.MOVEYPLUS,.05f);
+			} else if (keycode == Keys.C) {
+				si.move(Move.MOVEZMINUS,.05f);
+			} else if (keycode == Keys.D) {
+				si.move(Move.MOVEZPLUS,.05f);
+			} else if (keycode == Keys.Z) {
+				si.move(Move.MOVEXMINUS,.05f);
+			} else if (keycode == Keys.A) {
+				si.move(Move.MOVEXPLUS,.05f);
 				
-				si.move(Move.MOVEYMINUS);
-				
-			} else if (keycode == Keys.S || keycode == Keys.G) {
-				
-				si.move(Move.MOVEYPLUS);
-				
-			} else if (keycode == Keys.C || keycode == Keys.N) {
-				
-				si.move(Move.MOVEZMINUS);
-				
-			} else if (keycode == Keys.D || keycode == Keys.H) {
-				
-				si.move(Move.MOVEZPLUS);
-				
-			} else if (keycode == Keys.Z || keycode == Keys.V) {
-				
-				si.move(Move.MOVEXMINUS);
-				
-			} else if (keycode == Keys.A || keycode == Keys.F) {
-				
-				si.move(Move.MOVEXPLUS);
+			} else if (keycode == Keys.G) {
+				si.move(Move.MOVEYPLUS,1);
+			} else if (keycode == Keys.N) {
+				si.move(Move.MOVEZMINUS,1);
+			} else if (keycode == Keys.H) {
+				si.move(Move.MOVEZPLUS,1);
+			} else if (keycode == Keys.V) {
+				si.move(Move.MOVEXMINUS,1);
+			} else if (keycode == Keys.F) {
+				si.move(Move.MOVEXPLUS,1);
 				
 			} else if (keycode == Keys.LEFT) {
-				
 				si.turn(true);
-				
 			} else if (keycode == Keys.RIGHT) {
-				
 				si.turn(false);
 			}
 		}
 			
 		if (keycode == Keys.NUMPAD_0) {
+			cam.position.set(-150, 15, 0);
+			cam.lookAt(0,15,0);
+		}
 			
-			cam.position.set(-100, 150, -100);
-			cam.lookAt(150,0,150);
-			cam.update();
-			
-		} else if (keycode == Keys.NUMPAD_4) {
-			
-			cam.position.set(cam.position.x+5*12,cam.position.y,cam.position.z);
-			lookAtSelectedBlock();
-			
-		} else if (keycode == Keys.NUMPAD_1) {
-			
-			cam.position.set(cam.position.x-5*12,cam.position.y,cam.position.z);
-			lookAtSelectedBlock();
-			
-		} else if (keycode == Keys.NUMPAD_5) {
-			
-			cam.position.set(cam.position.x,cam.position.y+5*12,cam.position.z);
-			lookAtSelectedBlock();
 
-		} else if (keycode == Keys.NUMPAD_2) {
+		if (keycode > Keys.NUMPAD_0 && keycode < Keys.NUMPAD_9) {
+			lookAtSelectedBlock(keycode);
+		}
 			
-			cam.position.set(cam.position.x,cam.position.y-5*12,cam.position.z);
-			lookAtSelectedBlock();
-
-		} else if (keycode == Keys.NUMPAD_6) {
-			
-			cam.position.set(cam.position.x,cam.position.y,cam.position.z+5*12);
-			lookAtSelectedBlock();
-			
-		} else if (keycode == Keys.NUMPAD_3) {
-			
-			cam.position.set(cam.position.x,cam.position.y,cam.position.z-5*12);
-			lookAtSelectedBlock();
-			
-		} else if (keycode == Keys.ESCAPE) {
+		if (keycode == Keys.ESCAPE) {
 			
 			if(fullscreen) {
 				Gdx.graphics.setDisplayMode(1280, 768, false);
@@ -233,7 +204,7 @@ public class PatioDesigner extends SimpleGame {
 		return false;
 	}
 	
-	private void lookAtSelectedBlock() {
+	private void lookAtSelectedBlock(int keycode) {
 		
 		if (dialog.dropdown.getSelected() != null) {
 			
@@ -242,8 +213,29 @@ public class PatioDesigner extends SimpleGame {
 			
 			Vector3 tmp = new Vector3();
 			si.getInstance().transform.getTranslation(tmp);
-			 
-			cam.update();
+			
+			switch(keycode) {
+			case Keys.NUMPAD_2: 
+				cam.position.set(tmp.x-20,tmp.y,tmp.z);
+				break;
+			case Keys.NUMPAD_8: 
+				cam.position.set(tmp.x+20,tmp.y,tmp.z);
+				break;			
+			case Keys.NUMPAD_4: 
+				cam.position.set(tmp.x,tmp.y,tmp.z-20);
+				break;
+			case Keys.NUMPAD_6: 
+				cam.position.set(tmp.x,tmp.y,tmp.z+20);
+				break;
+			case Keys.NUMPAD_5: 
+				cam.position.set(tmp.x,tmp.y+50,tmp.z);
+				break;
+			}
+			
+			cam.up.set(new Vector3(0,1,0));
+
+			cam.lookAt(tmp);
+			
 		}
 	}
 

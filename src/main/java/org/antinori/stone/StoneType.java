@@ -21,9 +21,9 @@ public enum StoneType {
 			new Vector3(0,3f,0), new Vector3(0,3f,12f), new Vector3(11f,3f,1f), new Vector3(11f,3f,11f), 4.55f),
 									
 	BERTRAM_3P5_X_11P5_WALL("Bertram 3.5-in x 11.5-in Wall", 
-			new Vector3(0,0,0), new Vector3(0,0,11.5f), new Vector3(7.5f,0,0f), new Vector3(7.5f,0,11.5f),
-			new Vector3(0,3.5f,0), new Vector3(0,3.5f,11.5f), new Vector3(7.5f,3.5f,0f), new Vector3(7.5f,3.5f,11.5f), 4.55f);
-	
+			new Vector3(-4f,-2,-6f), new Vector3(-4f,-2,5.5f), new Vector3(3.5f,-2,-6f), new Vector3(3.5f,-2,5.5f),
+			new Vector3(-4f,1.5f,-6f), new Vector3(-4f,1.5f,5.5f), new Vector3(3.5f,1.5f,-6f), new Vector3(3.5f,1.5f,5.5f), 4.55f);
+		
 	private String name;
 	private float cost;
 	
