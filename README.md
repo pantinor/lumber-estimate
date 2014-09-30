@@ -7,6 +7,8 @@ Note that this tool is designed to run on desktop display mode.
 
 ![screenshot of animated pieces](https://raw.github.com/pantinor/lumber-estimate/master/preview.png)
 
+![screenshot of animated pieces](https://raw.github.com/pantinor/lumber-estimate/master/stone.preview.png)
+
 Download pre-built zip: https://dl.dropboxusercontent.com/u/84215797/lumber-estimate-1.0.1-bin.zip
 
 Download the archive, extract it and double click on the jar file to run the program.

@@ -5,8 +5,6 @@ import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
@@ -17,9 +15,6 @@ public class MaterialsWindow extends Window {
 
 	public MaterialsWindow(final Stage stage, PatioDesigner main, Skin skin) {
 		super("Materials", skin);
-		
-		BitmapFont customFont = new BitmapFont(Gdx.files.classpath("skin/Arial_12.fnt"),false);
-		customFont.setColor(Color.BLUE);
 		
 		defaults().padTop(2).padBottom(2).padLeft(5).padRight(5).left();
 		

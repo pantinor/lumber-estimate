@@ -98,14 +98,10 @@ public class StoneSelectionDialog extends Window {
 		tfz = createTextField("", skin);
 
 		Button add = createButton("Add", skin, createAddListener());
+		Button clone = createButton("Duplicate", skin, createCloneListener());
 		Button delete = createButton("Delete", skin, createDeleteListener());
-
-		Button mxm = createButton("X -", skin, createMoveListener(Keys.Z));
-		Button mxp = createButton("X +", skin, createMoveListener(Keys.A));
-		Button mym = createButton("Y -", skin, createMoveListener(Keys.X));
-		Button myp = createButton("Y +", skin, createMoveListener(Keys.S));
-		Button mzm = createButton("Z -", skin, createMoveListener(Keys.C));
-		Button mzp = createButton("Z +", skin, createMoveListener(Keys.D));
+		Button load = createButton("Load", skin, createLoadListener());
+		Button save = createButton("Save", skin, createSaveListener());
 
 		typeDropdown = new SelectBox(skin);
 		typeDropdown.setItems(StoneType.values());
@@ -130,9 +126,6 @@ public class StoneSelectionDialog extends Window {
 				StoneSelectionDialog.this.tfy.setText("" + tmp.y);
 				StoneSelectionDialog.this.tfz.setText("" + tmp.z);
 
-				// StoneSelectionDialog.this.main.cam.position.set(tmp.x-25,tmp.y,tmp.z);
-				// StoneSelectionDialog.this.main.cam.lookAt(tmp);
-				// StoneSelectionDialog.this.main.cam.update();
 			}
 		});
 
@@ -156,9 +149,11 @@ public class StoneSelectionDialog extends Window {
 		addBlockTable.add(tfx).maxWidth(tfWidth).width(tfWidth);
 		addBlockTable.add(tfy).maxWidth(tfWidth).width(tfWidth);
 		addBlockTable.add(tfz).maxWidth(tfWidth).width(tfWidth);
+		addBlockTable.add(add).maxWidth(75).width(75);
 		addBlockTable.row();
 
-		addBlockTable.add(add).maxWidth(75).width(75).colspan(4);
+		//addBlockTable.add().space(3).colspan(1);
+		//addBlockTable.add(add).maxWidth(75).width(75).colspan(3);
 
 		add(addBlockTable).colspan(4);
 		row();
@@ -168,25 +163,14 @@ public class StoneSelectionDialog extends Window {
 
 		add(dropdown).fillX().colspan(4);
 		row();
-
-		add().space(3).colspan(1);
-		add(mxp).maxWidth(btnWidth).width(btnWidth);
-		add(myp).maxWidth(btnWidth).width(btnWidth);
-		add(mzp).maxWidth(btnWidth).width(btnWidth);
-		row();
-
-		add(delete);
-		add(mxm).maxWidth(btnWidth).width(btnWidth);
-		add(mym).maxWidth(btnWidth).width(btnWidth);
-		add(mzm).maxWidth(btnWidth).width(btnWidth);
-		row();
-
-		Button load = createButton("Load", skin, createLoadListener());
-		Button save = createButton("Save", skin, createSaveListener());
+		
+	
 		Table bottom = new Table();
-		bottom.defaults().padTop(2).padBottom(2).padLeft(5).padRight(5).left();
+		bottom.defaults().padTop(2).padBottom(2).padLeft(2).padRight(2).left();
+		bottom.add(clone).maxWidth(75).width(75);
+		bottom.add(delete).maxWidth(75).width(75);
 		bottom.add(load).maxWidth(75).width(75);
-		bottom.add(save).maxWidth(75).width(75);
+		bottom.add(save).maxWidth(75).width(75);;
 		add(bottom).colspan(4);
 		row();
 
@@ -223,10 +207,39 @@ public class StoneSelectionDialog extends Window {
 					float ty = Float.parseFloat(tfy.getText());
 					float tz = Float.parseFloat(tfz.getText());
 
-					main.addBlock(StoneType.valueOf(typeDropdown.getSelected().toString()), tx, ty, tz);
+					String name = main.addBlock(StoneType.valueOf(typeDropdown.getSelected().toString()), tx, ty, tz);
 
 					String[] names = main.modelInstances.keySet().toArray(new String[0]);
 					dropdown.setItems(names);
+					dropdown.setSelected(name);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				return false;
+			}
+		};
+
+		return listener;
+	}
+	
+	private InputListener createCloneListener() {
+		InputListener listener = new InputListener() {
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+
+				try {
+					
+					String selected = dropdown.getSelected().toString();
+					if (StringUtils.isBlank(selected)) return false;
+
+					StoneInstance si = StoneSelectionDialog.this.main.modelInstances.get(selected);
+					String name = main.addBlock(si.getType(),0,0,0);
+					main.modelInstances.get(name).getInstance().transform.set(si.getInstance().transform);
+
+					String[] names = main.modelInstances.keySet().toArray(new String[0]);
+					dropdown.setItems(names);
+					dropdown.setSelected(name);
 
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -336,12 +349,14 @@ public class StoneSelectionDialog extends Window {
 					main.modelInstances.clear();
 					int i = 1;
 					for (String jsonInst : instances) {
+						if (StringUtils.isBlank(jsonInst)) continue;
 						Json json = new Json();
 						JsonWrapper jw = json.fromJson(JsonWrapper.class, jsonInst);
-						Model model = main.createPolygonBox(builder, jw.getSt(), Color.BLUE);
+						String name = "" + (i++);
+						Model model = main.createPolygonBox(builder, jw.getSt(), Color.BLUE, name);
 						ModelInstance instance = new ModelInstance(model, jw.getTransform());
 						StoneInstance si = new StoneInstance(instance, jw.getSt());
-						main.modelInstances.put("inst " + (i++), si);
+						main.modelInstances.put(name, si);
 					}
 
 					String[] names = main.modelInstances.keySet().toArray(new String[0]);

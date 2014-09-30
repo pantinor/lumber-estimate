@@ -8,7 +8,6 @@ import java.util.Map;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
@@ -24,9 +23,6 @@ public class PointsWindow extends Window {
 
 	public PointsWindow(final Stage stage, PatioDesigner main, Skin skin) {
 		super("Points", skin);
-		
-		BitmapFont customFont = new BitmapFont(Gdx.files.classpath("skin/Arial_12.fnt"),false);
-		customFont.setColor(Color.BLUE);
 		
 		defaults().padTop(2).padBottom(2).padLeft(5).padRight(5).left();
 		

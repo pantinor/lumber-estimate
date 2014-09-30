@@ -2,6 +2,7 @@ package org.antinori.stone;
 
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,18 +16,32 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.GL30;
+import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.BitmapFont.BitmapFontData;
+import com.badlogic.gdx.graphics.g2d.PixmapPacker;
+import com.badlogic.gdx.graphics.g2d.PixmapPacker.Page;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
 public class PatioDesigner extends SimpleGame {
 	
@@ -38,7 +53,8 @@ public class PatioDesigner extends SimpleGame {
 	
 	ModelInstance patio = null;
 	
-	private static int[] PRESSED_KEYS = {Keys.F,Keys.G,Keys.H,Keys.V,Keys.B,Keys.N,Keys.LEFT,Keys.RIGHT};
+	private static int[] PRESSED_KEYS = {Keys.LEFT,Keys.RIGHT};
+	public static BitmapFont customFont;
 
 		
 	public static void main(String[] args) {
@@ -57,7 +73,10 @@ public class PatioDesigner extends SimpleGame {
 		environment.add(new DirectionalLight().set(0.8f, 0.8f, 0.8f, -1f, -0.8f, -0.2f));
 
 		modelBatch = new ModelBatch();
+		spriteBatch = new SpriteBatch();
 		
+		customFont = new BitmapFont(true);
+
 		ModelBuilder builder = new ModelBuilder();
 		final Material material = new Material(ColorAttribute.createDiffuse(Color.ORANGE));
 		final long attributes = Usage.Position | Usage.Normal | Usage.TextureCoordinates;
@@ -110,33 +129,39 @@ public class PatioDesigner extends SimpleGame {
 	}
 	
 	public String addBlock(StoneType st, float tx, float ty, float tz) {
-		int i = 1;
-		String name = "inst " + i;
-		do {
-			if (!modelInstances.containsKey(name)) {
-				break;
-			}
-			name = "inst " + (i++);
-		} while (true);
-		
+		String name = getNextIndex();
 		ModelBuilder builder = new ModelBuilder();
-		Model model = createPolygonBox(builder, st, Color.BLUE);
+		Model model = createPolygonBox(builder, st, Color.BLUE, name);
 		ModelInstance instance = new ModelInstance(model, tx, ty, tz);
-
 		StoneInstance si = new StoneInstance(instance, st);
 		modelInstances.put(name, si);
-		
 		return name;
 	}
 	
-	public Model createPolygonBox(ModelBuilder mb, StoneType st, Color color) {
-		return createPolygonBox(mb, color, st.getC000(), st.getC010(), st.getC100(), st.getC110(), st.getC001(), st.getC011(), st.getC101(), st.getC111());
+	public String getNextIndex() {
+		int i = 1;
+		do {
+			if (!modelInstances.containsKey(""+i)) {
+				break;
+			}
+			i++;
+		} while (true);
+		return ""+i;
+	}
+	
+	public Model createPolygonBox(ModelBuilder mb, StoneType st, Color color, String label) {
+		return createPolygonBox(mb, color, label, st.getC000(), st.getC010(), st.getC100(), st.getC110(), st.getC001(), st.getC011(), st.getC101(), st.getC111());
 	}
 
-	public Model createPolygonBox(ModelBuilder modelBuilder, Color color, Vector3 corner000, Vector3 corner010, Vector3 corner100, Vector3 corner110, Vector3 corner001, Vector3 corner011, Vector3 corner101, Vector3 corner111) {
+	public Model createPolygonBox(ModelBuilder modelBuilder, Color color, String label, Vector3 corner000, Vector3 corner010, Vector3 corner100, Vector3 corner110, Vector3 corner001, Vector3 corner011, Vector3 corner101, Vector3 corner111) {
+		Texture texture = drawText(label);
+		TextureAttribute textureAttribute = new TextureAttribute(TextureAttribute.Diffuse, texture);
+		Material material = new Material(ColorAttribute.createDiffuse(color), textureAttribute);
 		modelBuilder.begin();
-		modelBuilder.part("box", GL30.GL_TRIANGLES, Usage.Position | Usage.Normal, new Material(ColorAttribute.createDiffuse(color))).box(corner000, corner010, corner100, corner110, corner001, corner011, corner101, corner111);
-		return modelBuilder.end();
+		modelBuilder.part("box", GL30.GL_TRIANGLES, Usage.Position | Usage.Normal | Usage.TextureCoordinates, material).box(corner000, corner010, corner100, corner110, corner001, corner011, corner101, corner111);
+		Model model = modelBuilder.end();
+		model.manageDisposable(texture);
+		return model;
 	}
 	
 	@Override
@@ -161,15 +186,17 @@ public class PatioDesigner extends SimpleGame {
 				si.move(Move.MOVEXPLUS,.05f);
 				
 			} else if (keycode == Keys.G) {
-				si.move(Move.MOVEYPLUS,1);
+				si.move(Move.MOVEYPLUS,2);
 			} else if (keycode == Keys.N) {
-				si.move(Move.MOVEZMINUS,1);
+				si.move(Move.MOVEZMINUS,2);
 			} else if (keycode == Keys.H) {
-				si.move(Move.MOVEZPLUS,1);
+				si.move(Move.MOVEZPLUS,2);
 			} else if (keycode == Keys.V) {
-				si.move(Move.MOVEXMINUS,1);
+				si.move(Move.MOVEXMINUS,2);
 			} else if (keycode == Keys.F) {
-				si.move(Move.MOVEXPLUS,1);
+				si.move(Move.MOVEXPLUS,2);
+			} else if (keycode == Keys.B) {
+				si.move(Move.MOVEYMINUS,2);
 				
 			} else if (keycode == Keys.LEFT) {
 				si.turn(true);
@@ -180,6 +207,7 @@ public class PatioDesigner extends SimpleGame {
 			
 		if (keycode == Keys.NUMPAD_0) {
 			cam.position.set(-150, 15, 0);
+			cam.up.set(new Vector3(0,1,0));
 			cam.lookAt(0,15,0);
 		}
 			
@@ -298,6 +326,34 @@ public class PatioDesigner extends SimpleGame {
 				
 		return list;
 	}
-
+	
+	public Texture drawText(String... text) {
+		
+		float height = customFont.getLineHeight() * (text.length + 1);
+		float width = 0;
+		float xoffset = 0;
+		float yoffset = 0;
+		float temp;
+		for (int i = 0; i < text.length; i++) {
+			temp = customFont.getBounds(text[i]).width;
+			if (temp > width)
+				width = temp;
+		}
+		FrameBuffer fB = new FrameBuffer(Format.RGBA4444, (int) width, (int) height, false);
+		fB.begin();
+		Gdx.graphics.getGL20().glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+		Gdx.graphics.getGL20().glClear(GL20.GL_COLOR_BUFFER_BIT);
+		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
+		spriteBatch.begin();
+		for (int line = 0; line < text.length; line++) {
+			customFont.draw(spriteBatch, text[line], xoffset, yoffset + (line + 1) * customFont.getLineHeight());
+		}
+		spriteBatch.end();
+		fB.end();
+		return fB.getColorBufferTexture();
+	}
+	
+	
+	
 
 }

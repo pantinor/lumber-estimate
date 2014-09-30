@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -14,6 +15,7 @@ public abstract class SimpleGame implements ApplicationListener, InputProcessor 
 
 	public ModelBatch modelBatch;
 	public ModelBatch shadowBatch;
+	public SpriteBatch spriteBatch;
 	public CameraInputController inputController;
 	public PerspectiveCamera cam;
 	
