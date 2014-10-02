@@ -2,7 +2,6 @@ package org.antinori.stone;
 
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,20 +14,16 @@ import com.badlogic.gdx.Graphics.DisplayMode;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.BitmapFont.BitmapFontData;
-import com.badlogic.gdx.graphics.g2d.PixmapPacker;
-import com.badlogic.gdx.graphics.g2d.PixmapPacker.Page;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFontParameter;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -41,7 +36,6 @@ import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 
 public class PatioDesigner extends SimpleGame {
 	
@@ -54,8 +48,7 @@ public class PatioDesigner extends SimpleGame {
 	ModelInstance patio = null;
 	
 	private static int[] PRESSED_KEYS = {Keys.LEFT,Keys.RIGHT};
-	public static BitmapFont customFont;
-
+	public static BitmapFont ftFont;
 		
 	public static void main(String[] args) {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
@@ -74,8 +67,16 @@ public class PatioDesigner extends SimpleGame {
 
 		modelBatch = new ModelBatch();
 		spriteBatch = new SpriteBatch();
-		
-		customFont = new BitmapFont(true);
+
+		FileHandle fontFile = Gdx.files.classpath("skin/arial.ttf");
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(fontFile);
+		FreeTypeFontParameter parameter = new FreeTypeFontParameter();
+		parameter.size = 8;
+		parameter.flip = true;
+		parameter.genMipMaps = true;
+		ftFont = generator.generateFont(parameter);
+		generator.dispose();
+		ftFont.setColor(Color.RED);
 
 		ModelBuilder builder = new ModelBuilder();
 		final Material material = new Material(ColorAttribute.createDiffuse(Color.ORANGE));
@@ -101,6 +102,7 @@ public class PatioDesigner extends SimpleGame {
 		cam.update();
 		
 		Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		Gdx.gl.glClearColor(0,0,0,0);
 		Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
 		
 		hud.act(Gdx.graphics.getDeltaTime());
@@ -123,9 +125,7 @@ public class PatioDesigner extends SimpleGame {
 		for (int k : PRESSED_KEYS) {
 			if (Gdx.input.isKeyPressed(k)) keyDown(k);
 		}
-		
-
-				
+							
 	}
 	
 	public String addBlock(StoneType st, float tx, float ty, float tz) {
@@ -327,29 +327,35 @@ public class PatioDesigner extends SimpleGame {
 		return list;
 	}
 	
+	/**
+	 * Draw text to a texture that can be applied to the box faces for easy identification and selection with a label.
+	 */
 	public Texture drawText(String... text) {
 		
-		float height = customFont.getLineHeight() * (text.length + 1);
+		float height = ftFont.getLineHeight() * (text.length + 1);
 		float width = 0;
 		float xoffset = 0;
 		float yoffset = 0;
 		float temp;
 		for (int i = 0; i < text.length; i++) {
-			temp = customFont.getBounds(text[i]).width;
+			temp = ftFont.getBounds(text[i]).width;
 			if (temp > width)
 				width = temp;
 		}
+		
+		SpriteBatch sb = new SpriteBatch();
 		FrameBuffer fB = new FrameBuffer(Format.RGBA4444, (int) width, (int) height, false);
 		fB.begin();
-		Gdx.graphics.getGL20().glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-		Gdx.graphics.getGL20().glClear(GL20.GL_COLOR_BUFFER_BIT);
-		spriteBatch.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
-		spriteBatch.begin();
+		Gdx.gl.glClearColor(1f, 1f, 1f, 0.0f);
+		Gdx.gl.glClear(GL30.GL_COLOR_BUFFER_BIT | GL30.GL_DEPTH_BUFFER_BIT);
+		sb.getProjectionMatrix().setToOrtho2D(0, 0, width, height);
+		sb.begin();
 		for (int line = 0; line < text.length; line++) {
-			customFont.draw(spriteBatch, text[line], xoffset, yoffset + (line + 1) * customFont.getLineHeight());
+			ftFont.draw(sb, text[line], xoffset, yoffset + (line + 1) * ftFont.getLineHeight());
 		}
-		spriteBatch.end();
+		sb.end();
 		fB.end();
+		
 		return fB.getColorBufferTexture();
 	}
 	
