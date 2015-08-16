@@ -1,10 +1,8 @@
 import java.text.NumberFormat;
 
-import junit.framework.Assert;
-
 import org.antinori.lumber.Wall;
-import org.junit.Test;
-
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 public class WallTest {
 	
@@ -57,6 +55,24 @@ public class WallTest {
 		Wall w6 = new Wall(10, 12, false, false);
 		System.out.println(w6.toString());
 		Assert.assertEquals(w6.getVerticalPieces().size(),9);
+	}
+	
+
+	@Test
+	public void isPalindrome() {
+		String wordOrPhrase = "pauly";
+	    char[] reversed = wordOrPhrase.toCharArray();
+
+	    char tmp;
+	    for(int i=reversed.length/2; i >= 0; i--) {
+	        tmp = reversed[i];
+	        reversed[i] = reversed[reversed.length-1-i];
+	        reversed[reversed.length-1-i] = tmp;
+	    }
+	    
+	    String res = new String(reversed);
+		System.out.println(res);
+
 	}
 	
 	@Test

@@ -139,7 +139,7 @@ public class Basic3DTest extends TestMain {
 		ModelBuilder modelBuilder = new ModelBuilder();
 		modelBuilder.begin();
 
-		MeshPartBuilder builder = modelBuilder.part("box", GL30.GL_LINES, Usage.Position | Usage.Color, new Material());
+		MeshPartBuilder builder = modelBuilder.part("box", GL30.GL_LINES, Usage.Position | Usage.ColorUnpacked, new Material());
 
 		builder.setColor(Color.MAGENTA);
 
