@@ -180,12 +180,12 @@ public class FramingStudDesigner extends SimpleGame {
         } else if (keycode == Keys.ESCAPE) {
 
             if (fullscreen) {
-                Gdx.graphics.setDisplayMode(1280, 768, false);
+                Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
                 hud.getViewport().update(1280, 768, false);
                 fullscreen = false;
             } else {
-                DisplayMode desktopDisplayMode = Gdx.graphics.getDesktopDisplayMode();
-                Gdx.graphics.setDisplayMode(desktopDisplayMode.width, desktopDisplayMode.height, true);
+                DisplayMode desktopDisplayMode = Gdx.graphics.getDisplayMode();
+                Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
                 hud.getViewport().update(desktopDisplayMode.width, desktopDisplayMode.height, false);
                 fullscreen = true;
             }

@@ -38,7 +38,7 @@ public class MaterialsWindow extends Window {
 
         pack();
 
-        DisplayMode dm = Gdx.graphics.getDesktopDisplayMode();
+        DisplayMode dm = Gdx.graphics.getDisplayMode();
 
         this.setPosition(dm.width - this.getWidth(), 0);
 

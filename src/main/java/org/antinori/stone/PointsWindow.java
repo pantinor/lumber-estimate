@@ -43,7 +43,7 @@ public class PointsWindow extends Window {
 
         pack();
 
-        DisplayMode dm = Gdx.graphics.getDesktopDisplayMode();
+        DisplayMode dm = Gdx.graphics.getDisplayMode();
 
         this.setPosition(dm.width - this.getWidth(), 0);
 
@@ -108,8 +108,8 @@ public class PointsWindow extends Window {
             FloatBuffer vertices = meshPart.mesh.getVerticesBuffer();
             final int strideInFloats = meshPart.mesh.getVertexSize() / (Float.SIZE / 8);
 
-            for (int j = 0; j < meshPart.numVertices; ++j) {
-                int index = indices.get(meshPart.indexOffset + j);
+            for (int j = 0; j < meshPart.size; ++j) {
+                int index = indices.get(meshPart.offset + j);
                 int offset = index * strideInFloats;
 
                 Vector3 tmpPosition = new Vector3();
